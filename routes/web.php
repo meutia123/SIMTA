@@ -16,6 +16,19 @@ Route::middleware('guest')->group(function () {
 
     Route::post('/login', [AuthController::class, 'login']);
 
+     
+    Route::get('/forgot-password', function () {
+        return view('auth.forgot-password');
+    })->name('forgot-password');
+
+    Route::get('/verify-otp', function () {
+    return view('auth.verify-otp');
+})->name('verify-otp');
+    Route::get('/new-password', function () {
+    return view('auth.new-password');
+})->name('new-password');
+
+
     Route::get('/register', [AuthController::class, 'showRegister'])
         ->name('register');
 

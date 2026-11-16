@@ -93,6 +93,14 @@
                 Login
             </button>
 
+          
+            <div class="text-center mt-3">
+    <a href="{{ route('forgot-password') }}"
+       class="text-blue-700 hover:underline text-sm">
+        Lupa Password?
+    </a>
+</div>
+
         </form>
 
     </div>
