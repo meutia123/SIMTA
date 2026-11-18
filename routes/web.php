@@ -74,6 +74,14 @@ Route::middleware('auth')->group(function () {
     ])->name('profil');
 
 
+    // HALAMAN TATA USAHA (TU)
+
+    Route::view('/tu/dashboard', 'pages.tu.dashboard')
+        ->name('tu.dashboard');
+
+    Route::view('/tu/administrasi-sk', 'pages.tu.administrasi-sk')
+        ->name('tu.administrasi-sk');
+
     // LOGOUT
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
