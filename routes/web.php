@@ -82,6 +82,9 @@ Route::middleware('auth')->group(function () {
     Route::view('/tu/administrasi-sk', 'pages.tu.administrasi-sk')
         ->name('tu.administrasi-sk');
 
+    Route::view('/tu/proses-sk', 'pages.tu.proses-sk')
+    ->name('tu.proses-sk');
+
     // LOGOUT
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
