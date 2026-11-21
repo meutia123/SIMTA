@@ -1,7 +1,7 @@
 
 <?php
-
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TugasAkhirController;
 use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
@@ -47,10 +47,10 @@ Route::middleware('auth')->group(function () {
 
 
     // TUGAS AKHIR
-    Route::view('/tugas-akhir', 'pages.placeholder', [
-        'title' => 'Tugas Akhir',
-        'description' => 'Halaman pengelolaan dan pemantauan tugas akhir mahasiswa.'
-    ])->name('tugas-akhir');
+    Route::get('/tugas-akhir', [TugasAkhirController::class, 'index'])
+    ->name('tugas-akhir');
+    Route::post('/tugas-akhir', [TugasAkhirController::class, 'store'])
+    ->name('tugas-akhir.store');
 
 
     // DOKUMEN
