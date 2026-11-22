@@ -53,22 +53,24 @@ class AuthController extends Controller
         $request->session()->regenerate();
         
 
-        switch ($user->role) {
+       switch (trim($user->role)) {
+    case 'mahasiswa':
+        return redirect()->route('dashboard');
 
-            case 'mahasiswa':
-                 return redirect('/dashboard');
+    case 'dosen':
+        return redirect()->route('dosen.dashboard');
 
-            case 'dosen':
-                return redirect('/dosen/dashboard');
+    case 'prodi':
+        return redirect()->route('prodi.dashboard');
 
-            case 'prodi':
-                return redirect('/prodi/dashboard');
+    case 'tu':
+        return redirect()->route('tu.dashboard');
 
-            case 'tu':
-                return redirect('/tu/dashboard');
-
-            default:
-                return redirect('/dashboard');
+    default:
+        Auth::logout();
+        return redirect('/login')->withErrors([
+            'login' => 'Role akun tidak dikenali.'
+        ]);
 }
 }
 
