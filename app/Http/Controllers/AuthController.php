@@ -47,12 +47,32 @@ class AuthController extends Controller
                 ->onlyInput('login');
         }
 
+        
         // 3. Semua cocok → login
         Auth::login($user, $request->filled('remember'));
         $request->session()->regenerate();
+        
 
-        return redirect()->intended('/dashboard');
-    }
+       switch (trim($user->role)) {
+    case 'mahasiswa':
+        return redirect()->route('dashboard');
+
+    case 'dosen':
+        return redirect()->route('dosen.dashboard');
+
+    case 'prodi':
+        return redirect()->route('prodi.dashboard');
+
+    case 'tu':
+        return redirect()->route('tu.dashboard');
+
+    default:
+        Auth::logout();
+        return redirect('/login')->withErrors([
+            'login' => 'Role akun tidak dikenali.'
+        ]);
+}
+}
 
     // Tampilkan halaman register
     public function showRegister()
@@ -99,6 +119,7 @@ class AuthController extends Controller
         return redirect()->route('login')
             ->with('success', 'Registrasi berhasil, silakan login.');
     }
+    
 
     // Logout
     public function logout(Request $request)
