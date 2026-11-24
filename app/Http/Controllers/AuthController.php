@@ -10,13 +10,11 @@ use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
-    // Tampilkan halaman login
     public function showLogin()
     {
         return view('auth.login');
     }
 
-    // Proses login
     public function login(Request $request)
     {
         $request->validate([
@@ -28,6 +26,7 @@ class AuthController extends Controller
         ]);
 
         $loginInput = $request->input('login');
+
         $fieldType = filter_var($loginInput, FILTER_VALIDATE_EMAIL)
             ? 'email'
             : 'nim';
@@ -36,13 +35,17 @@ class AuthController extends Controller
 
         if (!$user) {
             return back()
-                ->withErrors(['login' => 'Email atau NIM tidak terdaftar.'])
+                ->withErrors([
+                    'login' => 'Email atau NIM tidak terdaftar.'
+                ])
                 ->onlyInput('login');
         }
 
         if (!Hash::check($request->password, $user->password)) {
             return back()
-                ->withErrors(['password' => 'Password salah.'])
+                ->withErrors([
+                    'password' => 'Password salah.'
+                ])
                 ->onlyInput('login');
         }
 
@@ -64,6 +67,7 @@ class AuthController extends Controller
 
             default:
                 Auth::logout();
+
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
@@ -73,13 +77,11 @@ class AuthController extends Controller
         }
     }
 
-    // Tampilkan halaman registrasi
     public function showRegister()
     {
         return view('auth.register');
     }
 
-    // Proses registrasi
     public function register(Request $request)
     {
         $request->validate([
@@ -111,15 +113,15 @@ class AuthController extends Controller
             'name' => $request->name,
             'nim' => $request->nim,
             'email' => $request->email,
-            'password' => $request->password,
+            'password' => Hash::make($request->password),
             'role' => 'mahasiswa',
         ]);
 
-        return redirect()->route('login')
+        return redirect()
+            ->route('login')
             ->with('success', 'Registrasi berhasil, silakan login.');
     }
 
-    // Logout
     public function logout(Request $request)
     {
         Auth::logout();
