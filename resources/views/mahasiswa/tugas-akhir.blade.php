@@ -13,23 +13,6 @@
         <h2 class="text-2xl font-bold">
             Tugas Akhir Saya
         </h2>
-
-        <div class="flex gap-2 flex-wrap">
-            <a href="#form-ajukan"
-               class="bg-green-700 text-white px-4 py-2 rounded">
-                Ajukan Judul
-            </a>
-
-            <button type="button"
-                    class="bg-green-700 text-white px-4 py-2 rounded">
-                Daftar Sempro
-            </button>
-
-            <button type="button"
-                    class="bg-green-700 text-white px-4 py-2 rounded">
-                Daftar Sidang
-            </button>
-        </div>
     </div>
 
     {{-- NOTIFIKASI BERHASIL --}}
@@ -54,100 +37,59 @@
         </div>
     @endif
 
-    {{-- FORM PENGAJUAN JUDUL --}}
-    <div id="form-ajukan" class="bg-white rounded-xl border p-6">
+    {{-- MENU FITUR (URUTAN: AJUKAN JUDUL -> DAFTAR SEMPRO -> DAFTAR SIDANG) --}}
+    <div class="bg-white rounded-xl border p-6">
 
         <h3 class="text-lg font-bold mb-4">
-            Form Pengajuan Judul Tugas Akhir
+            Fitur Tugas Akhir
         </h3>
 
-        <form action="{{ route('tugas-akhir.store') }}" method="POST">
-            @csrf
+        <p class="text-sm text-gray-500 mb-6">
+            Ikuti urutan pengajuan tugas akhir dari yang pertama.
+        </p>
 
-            {{-- JUDUL --}}
-            <div class="mb-4">
-                <label class="block font-semibold mb-2">
-                    Judul Tugas Akhir
-                </label>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
-                <input
-                    type="text"
-                    name="judul"
-                    value="{{ old('judul') }}"
-                    placeholder="Masukkan judul tugas akhir"
-                    class="w-full border rounded-lg p-3"
-                    maxlength="255"
-                    required
-                >
-            </div>
-
-            {{-- TOPIK --}}
-            <div class="mb-4">
-                <label class="block font-semibold mb-2">
-                    Topik Tugas Akhir
-                </label>
-
-                <input
-                    type="text"
-                    name="topik"
-                    value="{{ old('topik') }}"
-                    placeholder="Masukkan topik tugas akhir"
-                    class="w-full border rounded-lg p-3"
-                    maxlength="255"
-                    required
-                >
-            </div>
-
-            {{-- DESKRIPSI --}}
-            <div class="mb-4">
-                <label class="block font-semibold mb-2">
-                    Deskripsi
-                </label>
-
-                <textarea
-                    name="deskripsi"
-                    rows="4"
-                    placeholder="Masukkan deskripsi tugas akhir"
-                    class="w-full border rounded-lg p-3"
-                >{{ old('deskripsi') }}</textarea>
-            </div>
-
-            {{-- TIGA CALON DOSEN --}}
-            @for($i = 1; $i <= 3; $i++)
-                <div class="mb-4">
-                    <label class="block font-semibold mb-2">
-                        Calon Dosen Pembimbing {{ $i }}
-                    </label>
-
-                    <select
-                        name="calon_dosen_{{ $i }}"
-                        class="w-full border rounded-lg p-3"
-                        required
-                    >
-                        <option value="">-- Pilih Dosen --</option>
-
-                        @foreach($dosen as $item)
-                            <option
-                                value="{{ $item->id }}"
-                                {{ old('calon_dosen_'.$i) == $item->id ? 'selected' : '' }}
-                            >
-                                {{ $item->name }}
-                            </option>
-                        @endforeach
-                    </select>
+            <a href="{{ route('tugas-akhir.ajukan-judul') }}"
+               class="block bg-green-700 text-white rounded-xl p-5 hover:bg-green-800 transition">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold">
+                        1
+                    </div>
+                    <div>
+                        <p class="font-semibold">Ajukan Judul</p>
+                        <p class="text-xs text-green-100">Pengajuan judul tugas akhir</p>
+                    </div>
                 </div>
-            @endfor
+            </a>
 
-            {{-- TOMBOL KIRIM --}}
-            <button
-                type="submit"
-                class="bg-green-700 hover:bg-green-800 text-white px-5 py-2 rounded-lg"
-            >
-                Kirim Pengajuan
-            </button>
+            <a href="{{ route('tugas-akhir.daftar-sempro') }}"
+               class="block border-2 border-green-700 text-green-700 rounded-xl p-5 hover:bg-green-50 transition">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full border border-green-700 flex items-center justify-center font-bold text-green-700">
+                        2
+                    </div>
+                    <div>
+                        <p class="font-semibold">Daftar Sempro</p>
+                        <p class="text-xs text-green-600">Seminar proposal</p>
+                    </div>
+                </div>
+            </a>
 
-        </form>
+            <a href="{{ route('tugas-akhir.daftar-sidang') }}"
+               class="block border-2 border-green-700 text-green-700 rounded-xl p-5 hover:bg-green-50 transition">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full border border-green-700 flex items-center justify-center font-bold text-green-700">
+                        3
+                    </div>
+                    <div>
+                        <p class="font-semibold">Daftar Sidang</p>
+                        <p class="text-xs text-green-600">Sidang tugas akhir</p>
+                    </div>
+                </div>
+            </a>
 
+        </div>
     </div>
 
     {{-- PROGRES TUGAS AKHIR --}}
@@ -160,19 +102,19 @@
         <div class="grid grid-cols-4 text-center gap-2">
 
             <div>
-                <div class="w-10 h-10 mx-auto rounded-full bg-red-700 text-white flex items-center justify-center">
+                <div class="w-10 h-10 mx-auto rounded-full bg-gray-300 text-black flex items-center justify-center">
                     1
                 </div>
-                <p class="mt-2 text-sm">
+                <p class="mt-2 text-sm text-gray-600">
                     Pengajuan Judul
                 </p>
             </div>
 
             <div>
-                <div class="w-10 h-10 mx-auto rounded-full bg-green-700 text-white flex items-center justify-center">
+                <div class="w-10 h-10 mx-auto rounded-full bg-gray-300 text-black flex items-center justify-center">
                     2
                 </div>
-                <p class="mt-2 text-sm">
+                <p class="mt-2 text-sm text-gray-600">
                     Penetapan Pembimbing
                 </p>
             </div>
@@ -181,7 +123,7 @@
                 <div class="w-10 h-10 mx-auto rounded-full bg-gray-300 text-black flex items-center justify-center">
                     3
                 </div>
-                <p class="mt-2 text-sm">
+                <p class="mt-2 text-sm text-gray-600">
                     Seminar Proposal
                 </p>
             </div>
@@ -190,7 +132,7 @@
                 <div class="w-10 h-10 mx-auto rounded-full bg-gray-300 text-black flex items-center justify-center">
                     4
                 </div>
-                <p class="mt-2 text-sm">
+                <p class="mt-2 text-sm text-gray-600">
                     Sidang
                 </p>
             </div>

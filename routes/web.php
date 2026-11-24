@@ -33,59 +33,72 @@ Route::middleware('guest')->group(function () {
 // AUTH ROUTES
 Route::middleware('auth')->group(function () {
 
-    // DASHBOARD MAHASISWA
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    // ROLE MAHASISWA
+    Route::middleware('role:mahasiswa')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('dashboard');
+        })->name('dashboard');
 
-    // DASHBOARD DOSEN
-    Route::get('/dosen/dashboard', function () {
-        return view('pages.dosen.dashboard');
-    })->name('dosen.dashboard');
+        Route::get('/tugas-akhir', [TugasAkhirController::class, 'index'])
+            ->name('tugas-akhir');
 
-    // DASHBOARD PRODI
-    Route::get('/prodi/dashboard', function () {
-        return view('pages.prodi.dashboard');
-    })->name('prodi.dashboard');
+        Route::post('/tugas-akhir', [TugasAkhirController::class, 'store'])
+            ->name('tugas-akhir.store');
 
-    // DASHBOARD TU
-    Route::get('/tu/dashboard', function () {
-        return view('pages.tu.dashboard');
-    })->name('tu.dashboard');
+        Route::get('/tugas-akhir/ajukan-judul', [TugasAkhirController::class, 'ajukanJudul'])
+            ->name('tugas-akhir.ajukan-judul');
 
-    // TUGAS AKHIR
-    Route::get('/tugas-akhir', [TugasAkhirController::class, 'index'])
-        ->name('tugas-akhir');
+        Route::get('/tugas-akhir/daftar-sempro', [TugasAkhirController::class, 'daftarSempro'])
+            ->name('tugas-akhir.daftar-sempro');
 
-    Route::post('/tugas-akhir', [TugasAkhirController::class, 'store'])
-        ->name('tugas-akhir.store');
+        Route::get('/tugas-akhir/daftar-sidang', [TugasAkhirController::class, 'daftarSidang'])
+            ->name('tugas-akhir.daftar-sidang');
+    });
 
-    // DOKUMEN
+    // ROLE DOSEN
+    Route::middleware('role:dosen')->group(function () {
+        Route::get('/dosen/dashboard', function () {
+            return view('pages.dosen.dashboard');
+        })->name('dosen.dashboard');
+    });
+
+    // ROLE PRODI
+    Route::middleware('role:prodi')->group(function () {
+        Route::get('/prodi/dashboard', function () {
+            return view('pages.prodi.dashboard');
+        })->name('prodi.dashboard');
+    });
+
+    // ROLE TU
+    Route::middleware('role:tu')->group(function () {
+        Route::get('/tu/dashboard', function () {
+            return view('pages.tu.dashboard');
+        })->name('tu.dashboard');
+
+        Route::view('/tu/administrasi-sk', 'pages.tu.administrasi-sk')
+            ->name('tu.administrasi-sk');
+
+        Route::view('/tu/proses-sk', 'pages.tu.proses-sk')
+            ->name('tu.proses-sk');
+    });
+
+    // HALAMAN BERSAMA UNTUK PENGGUNA YANG LOGIN
     Route::view('/dokumen', 'pages.placeholder', [
         'title' => 'Dokumen',
         'description' => 'Halaman pengelolaan dokumen tugas akhir mahasiswa.'
     ])->name('dokumen');
 
-    // JADWAL
     Route::view('/jadwal', 'pages.placeholder', [
         'title' => 'Jadwal',
         'description' => 'Halaman informasi jadwal bimbingan dan sidang.'
     ])->name('jadwal');
 
-    // PROFIL
     Route::view('/profil', 'pages.placeholder', [
         'title' => 'Profil',
         'description' => 'Halaman informasi profil pengguna.'
     ])->name('profil');
 
-    // ADMINISTRASI TU
-    Route::view('/tu/administrasi-sk', 'pages.tu.administrasi-sk')
-        ->name('tu.administrasi-sk');
-
-    Route::view('/tu/proses-sk', 'pages.tu.proses-sk')
-    ->name('tu.proses-sk');
-
-    // LOGOUT
+    // LOGOUT UNTUK SEMUA ROLE
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
 });

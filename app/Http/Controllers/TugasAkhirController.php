@@ -59,4 +59,41 @@ class TugasAkhirController extends Controller
             ->route('tugas-akhir')
             ->with('success', 'Pengajuan judul berhasil dikirim.');
     }
+
+    public function ajukanJudul()
+    {
+        $tugasAkhir = TugasAkhir::where('user_id', Auth::id())
+            ->latest()
+            ->first();
+
+        $dosen = User::where('role', 'dosen')->orderBy('name')->get();
+
+        return view('mahasiswa.ajukan-judul', compact('tugasAkhir', 'dosen'));
+    }
+
+    public function daftarSempro()
+    {
+        $tugasAkhir = TugasAkhir::where('user_id', Auth::id())
+            ->latest()
+            ->first();
+
+        $sempro = TugasAkhir::where('user_id', Auth::id())
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return view('mahasiswa.daftar-sempro', compact('tugasAkhir', 'sempro'));
+    }
+
+    public function daftarSidang()
+    {
+        $tugasAkhir = TugasAkhir::where('user_id', Auth::id())
+            ->latest()
+            ->first();
+
+        $sidang = TugasAkhir::where('user_id', Auth::id())
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return view('mahasiswa.daftar-sidang', compact('tugasAkhir', 'sidang'));
+    }
 }
