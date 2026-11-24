@@ -35,7 +35,7 @@ class DosenDashboardController extends Controller
         $pengujiSempro = max(0, (int) floor($mahasiswaSaya * 0.6));
         $pengujiSidang = max(0, (int) floor($mahasiswaSaya * 0.4));
 
-        return view('pages.dosen.dashboard', [
+        return view('dosen.dashboard', [
             'mahasiswaSaya' => $mahasiswaSaya,
             'pengujiSempro' => $pengujiSempro,
             'pengujiSidang' => $pengujiSidang,
