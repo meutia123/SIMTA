@@ -70,17 +70,17 @@ Route::middleware('auth')->group(function () {
     });
 
     // ROLE TU
-    Route::middleware('role:tu')->group(function () {
-        Route::get('/tu/dashboard', function () {
-            return view('pages.tu.dashboard');
-        })->name('tu.dashboard');
+Route::middleware('role:tu')->group(function () {
+    Route::get('/tu/dashboard', function () {
+        return view('tu.dashboard');
+    })->name('tu.dashboard');
 
-        Route::view('/tu/administrasi-sk', 'pages.tu.administrasi-sk')
-            ->name('tu.administrasi-sk');
+    Route::view('/tu/administrasi-sk', 'tu.administrasi-sk')
+        ->name('tu.administrasi-sk');
 
-        Route::view('/tu/proses-sk', 'pages.tu.proses-sk')
-            ->name('tu.proses-sk');
-    });
+    Route::view('/tu/proses-sk', 'tu.proses-sk')
+        ->name('tu.proses-sk');
+});
 
     // HALAMAN BERSAMA UNTUK PENGGUNA YANG LOGIN
     Route::view('/dokumen', 'pages.placeholder', [
