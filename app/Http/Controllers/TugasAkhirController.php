@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\TugasAkhir;
 use App\Models\User;
+use App\Models\Document;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class TugasAkhirController extends Controller
 {
@@ -95,5 +97,84 @@ class TugasAkhirController extends Controller
             ->get();
 
         return view('mahasiswa.daftar-sidang', compact('tugasAkhir', 'sidang'));
+    }
+
+    public function dokumen()
+    {
+        $tugasAkhir = TugasAkhir::where('user_id', Auth::id())
+            ->latest()
+            ->first();
+
+        $documents = Document::where('user_id', Auth::id())
+            ->with('tugasAkhir')
+            ->latest()
+            ->get();
+
+        $dokumenWajib = [
+            ['nama' => 'SK Pembimbing', 'jenis' => 'Surat Keputusan', 'wajib' => true],
+            ['nama' => 'Proposal Tugas Akhir', 'jenis' => 'Proposal', 'wajib' => true],
+            ['nama' => 'SK Tim Penguji', 'jenis' => 'Surat Keputusan', 'wajib' => true],
+            ['nama' => 'Berita Acara', 'jenis' => 'Berita Acara', 'wajib' => true],
+            ['nama' => 'Lembar Persetujuan', 'jenis' => 'Lembar Persetujuan', 'wajib' => true],
+        ];
+
+        return view('mahasiswa.pages.dokumen', compact('tugasAkhir', 'documents', 'dokumenWajib'));
+    }
+
+    public function uploadDokumen(Request $request)
+    {
+        $validated = $request->validate([
+            'nama_dokumen' => 'required|string|max:255',
+            'jenis_dokumen' => 'required|string|max:255',
+            'file' => 'required|file|mimes:pdf,doc,docx|max:10240',
+        ]);
+
+        $tugasAkhir = TugasAkhir::where('user_id', Auth::id())->latest()->first();
+
+        $file = $request->file('file');
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $filePath = $file->storeAs('documents/' . Auth::id(), $fileName, 'public');
+
+        Document::create([
+            'user_id' => Auth::id(),
+            'tugas_akhir_id' => $tugasAkhir?->id,
+            'nama_dokumen' => $validated['nama_dokumen'],
+            'jenis_dokumen' => $validated['jenis_dokumen'],
+            'file_path' => $filePath,
+            'file_name' => $file->getClientOriginalName(),
+            'file_size' => $file->getSize(),
+            'mime_type' => $file->getMimeType(),
+            'status' => 'diupload',
+        ]);
+
+        return redirect()
+            ->route('dokumen')
+            ->with('success', 'Dokumen berhasil diunggah.');
+    }
+
+    public function hapusDokumen(Document $document)
+    {
+        if ($document->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if (Storage::disk('public')->exists($document->file_path)) {
+            Storage::disk('public')->delete($document->file_path);
+        }
+
+        $document->delete();
+
+        return redirect()
+            ->route('dokumen')
+            ->with('success', 'Dokumen berhasil dihapus.');
+    }
+
+    public function downloadDokumen(Document $document)
+    {
+        if ($document->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return Storage::disk('public')->download($document->file_path, $document->file_name);
     }
 }

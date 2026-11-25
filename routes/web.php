@@ -47,10 +47,10 @@ Route::middleware(['auth', 'role:tu'])->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::view('/dokumen', 'pages.placeholder', [
-        'title' => 'Dokumen',
-        'description' => 'Halaman pengelolaan dokumen tugas akhir mahasiswa.'
-    ])->name('dokumen');
+    Route::get('/dokumen', [TugasAkhirController::class, 'dokumen'])->name('dokumen');
+    Route::post('/dokumen/upload', [TugasAkhirController::class, 'uploadDokumen'])->name('dokumen.upload');
+    Route::delete('/dokumen/{document}', [TugasAkhirController::class, 'hapusDokumen'])->name('dokumen.hapus');
+    Route::get('/dokumen/{document}/download', [TugasAkhirController::class, 'downloadDokumen'])->name('dokumen.download');
 
     Route::view('/jadwal', 'pages.placeholder', [
         'title' => 'Jadwal',
