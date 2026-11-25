@@ -35,7 +35,7 @@
 
             <button
                 type="submit"
-                class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg">
+                class="w-full bg-[#841719] hover:bg-[#6f1214] text-white font-semibold py-3 rounded-lg">
                 Simpan Password
             </button>
 

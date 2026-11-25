@@ -10,18 +10,31 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'role' => 'mahasiswa',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'zoriaftrc@gmail.com'],
+            [
+                'name' => 'Zoria Fitriaca',
+                'nim' => '2417020095',
+                'password' => Hash::make('mhs123'),
+                'role' => 'mahasiswa',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => Hash::make('mhs123'),
+                'role' => 'mahasiswa',
+            ]
+        );
 
         User::updateOrCreate(
             ['email' => 'dosen@example.com'],
             [
                 'name' => 'Dosen SIMTA',
                 'nim' => 'DOSEN001',
-                'password' => Hash::make('Dosen123!'),
+                'password' => Hash::make('dosen123'),
                 'role' => 'dosen',
             ]
         );
@@ -31,7 +44,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Dr. Ahmad Sutrisno, M.Kom',
                 'nim' => 'DOSEN002',
-                'password' => Hash::make('Dosen123!'),
+                'password' => Hash::make('dosen123'),
                 'role' => 'dosen',
             ]
         );
@@ -41,7 +54,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Prof. Dr. Siti Rahayu, M.T.',
                 'nim' => 'DOSEN003',
-                'password' => Hash::make('Dosen123!'),
+                'password' => Hash::make('dosen123'),
                 'role' => 'dosen',
             ]
         );
@@ -51,7 +64,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Dr. Budi Santoso, M.Kom',
                 'nim' => 'DOSEN004',
-                'password' => Hash::make('Dosen123!'),
+                'password' => Hash::make('dosen123'),
                 'role' => 'dosen',
             ]
         );
@@ -61,7 +74,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Ir. Dewi Lestari, M.T.',
                 'nim' => 'DOSEN005',
-                'password' => Hash::make('Dosen123!'),
+                'password' => Hash::make('dosen123'),
                 'role' => 'dosen',
             ]
         );
@@ -71,8 +84,18 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Staff TU',
                 'nim' => 'TU001',
-                'password' => Hash::make('Tu123456!'),
+                'password' => Hash::make('tu123'),
                 'role' => 'tu',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'prodi@example.com'],
+            [
+                'name' => 'Kordinator Prodi',
+                'nim' => 'PRODI001',
+                'password' => Hash::make('prodi123'),
+                'role' => 'prodi',
             ]
         );
     }

@@ -47,7 +47,7 @@
                         name="login"
                         value="{{ old('login') }}"
                         placeholder="Masukkan Email atau Nim"
-                        class="w-full pl-11 pr-4 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        class="w-full pl-11 pr-4 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#841719] text-sm"
                         required>
                 </div>
 
@@ -71,7 +71,7 @@
                         id="password"
                         name="password"
                         placeholder="Masukkan Password"
-                        class="w-full pl-11 pr-11 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        class="w-full pl-11 pr-11 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#841719] text-sm"
                         required>
 
                     <button
@@ -89,14 +89,14 @@
 
             <button
                 type="submit"
-                class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition">
+                class="w-full bg-[#841719] hover:bg-[#6f1214] text-white font-semibold py-3 rounded-lg transition">
                 Login
             </button>
 
           
             <div class="text-center mt-3">
     <a href="{{ route('forgot-password') }}"
-       class="text-blue-700 hover:underline text-sm">
+       class="text-[#841719] hover:underline text-sm">
         Lupa Password?
     </a>
 </div>

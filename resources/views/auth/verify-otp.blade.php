@@ -24,12 +24,12 @@
             <input
                 type="text"
                 placeholder="Masukkan Kode OTP"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-[#841719]"
                 required>
 
             <button
                 type="submit"
-                class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg">
+                class="w-full bg-[#841719] hover:bg-[#6f1214] text-white font-semibold py-3 rounded-lg">
                 Verifikasi
             </button>
 

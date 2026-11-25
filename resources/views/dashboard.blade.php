@@ -7,11 +7,11 @@
 <div class="space-y-5">
 
     {{-- Banner Selamat Datang --}}
-    <div class="bg-blue-700 text-white rounded-xl p-6">
+    <div class="bg-[#841719] text-white rounded-xl p-6">
         <h1 class="text-2xl font-bold">
             Selamat Datang, {{ Auth::user()->name }}!
         </h1>
-        <p class="text-sm mt-2 text-blue-100">
+        <p class="text-sm mt-2 text-red-100">
             Selamat datang di Sistem Informasi Manajemen Tugas Akhir.
             Pantau perkembangan tugas akhir Anda melalui SIMTA.
         </p>
@@ -22,14 +22,14 @@
         <input
             type="text"
             placeholder="Cari informasi..."
-            class="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            class="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#841719]"
         >
 
         <button class="bg-white border border-gray-200 rounded-lg px-4 py-3">
             🔔
         </button>
 
-        <div class="w-10 h-10 rounded-full bg-blue-700 text-white flex items-center justify-center font-bold">
+        <div class="w-10 h-10 rounded-full bg-[#841719] text-white flex items-center justify-center font-bold">
             {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
         </div>
     </div>

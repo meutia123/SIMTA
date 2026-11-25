@@ -47,7 +47,7 @@
                         name="name"
                         value="{{ old('name') }}"
                         placeholder="Masukkan Nama Lengkap"
-                        class="w-full pl-11 pr-4 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        class="w-full pl-11 pr-4 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#841719] text-sm"
                         required>
                 </div>
 
@@ -72,7 +72,7 @@
                         name="nim"
                         value="{{ old('nim') }}"
                         placeholder="Masukkan NIM"
-                        class="w-full pl-11 pr-4 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        class="w-full pl-11 pr-4 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#841719] text-sm"
                         required>
                 </div>
 
@@ -97,7 +97,7 @@
                         name="email"
                         value="{{ old('email') }}"
                         placeholder="Masukkan Email"
-                        class="w-full pl-11 pr-4 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        class="w-full pl-11 pr-4 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#841719] text-sm"
                         required>
                 </div>
 
@@ -121,7 +121,7 @@
                         id="password"
                         name="password"
                         placeholder="Masukkan Password"
-                        class="w-full pl-11 pr-11 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        class="w-full pl-11 pr-11 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#841719] text-sm"
                         required>
 
                     <button
@@ -152,7 +152,7 @@
                         id="password_confirmation"
                         name="password_confirmation"
                         placeholder="Konfirmasi Password"
-                        class="w-full pl-11 pr-4 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        class="w-full pl-11 pr-4 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#841719] text-sm"
                         required>
                 </div>
 
@@ -163,7 +163,7 @@
 
             <button
                 type="submit"
-                class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition">
+                class="w-full bg-[#841719] hover:bg-[#6f1214] text-white font-semibold py-3 rounded-lg transition">
                 Daftar
             </button>
 
@@ -171,7 +171,7 @@
 
         <div class="text-center mt-4">
             <span class="text-sm text-gray-600">Sudah punya akun? </span>
-            <a href="{{ route('login') }}" class="text-blue-700 hover:underline text-sm font-semibold">
+            <a href="{{ route('login') }}" class="text-[#841719] hover:underline text-sm font-semibold">
                 Login
             </a>
         </div>

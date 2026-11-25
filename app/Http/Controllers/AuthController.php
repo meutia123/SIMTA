@@ -61,7 +61,6 @@ class AuthController extends Controller
 
             case 'prodi':
                 return redirect()->route('prodi.dashboard');
-
             case 'tu':
                 return redirect()->route('tu.dashboard');
 

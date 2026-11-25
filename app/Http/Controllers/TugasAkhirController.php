@@ -31,10 +31,9 @@ class TugasAkhirController extends Controller
             'deskripsi' => 'nullable|string',
             'calon_dosen_1' => 'required|exists:users,id',
             'calon_dosen_2' => 'required|different:calon_dosen_1|exists:users,id',
-            'calon_dosen_3' => 'required|different:calon_dosen_1|different:calon_dosen_2|exists:users,id',
         ]);
 
-        foreach (['calon_dosen_1', 'calon_dosen_2', 'calon_dosen_3'] as $field) {
+        foreach (['calon_dosen_1', 'calon_dosen_2'] as $field) {
             $isDosen = User::where('id', $validated[$field])
                 ->where('role', 'dosen')
                 ->exists();
@@ -53,7 +52,7 @@ class TugasAkhirController extends Controller
             'deskripsi' => $validated['deskripsi'] ?? null,
             'calon_dosen_1' => $validated['calon_dosen_1'],
             'calon_dosen_2' => $validated['calon_dosen_2'],
-            'calon_dosen_3' => $validated['calon_dosen_3'],
+            'calon_dosen_3' => null,
             'status' => 'Menunggu'
         ]);
 

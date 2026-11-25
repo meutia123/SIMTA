@@ -84,10 +84,10 @@
                         Pilih tiga calon dosen pembimbing sesuai preferensi Anda.
                     </p>
 
-                    @for($i = 1; $i <= 3; $i++)
+                    @for($i = 1; $i <= 2; $i++)
                         <div class="mb-4">
                             <label class="block text-sm font-semibold mb-2">
-                                Pilihan {{ $i }} <span class="text-red-600">*</span>
+                                Pembimbing {{ $i }} <span class="text-red-600">*</span>
                             </label>
 
                             <select name="calon_dosen_{{ $i }}" required
@@ -156,7 +156,7 @@
                         <li>Gunakan judul yang jelas dan sesuai bidang penelitian.</li>
                         <li>Isi topik penelitian dengan tepat.</li>
                         <li>Tuliskan deskripsi singkat penelitian.</li>
-                        <li>Pilih tiga calon dosen pembimbing yang berbeda.</li>
+                        <li>Pilih dua calon dosen pembimbing yang berbeda.</li>
                         <li>Periksa kembali data sebelum mengirim pengajuan.</li>
                     </ul>
                 </div>
