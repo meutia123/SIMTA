@@ -19,16 +19,29 @@
             Masukkan password baru Anda
         </p>
 
-        <form action="{{ route('login') }}" method="GET">
+        @if($errors->any())
+            <div class="mb-4 rounded-lg bg-red-100 px-4 py-3 text-sm text-red-700">
+                @foreach($errors->all() as $error)
+                    <p>{{ $error }}</p>
+                @endforeach
+            </div>
+        @endif
+
+        <form action="{{ route('password.update') }}" method="POST">
+            @csrf
+            <input type="hidden" name="token" value="{{ $token }}">
+            <input type="hidden" name="email" value="{{ old('email', $email) }}">
 
             <input
                 type="password"
+                name="password"
                 placeholder="Password Baru"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4"
                 required>
 
             <input
                 type="password"
+                name="password_confirmation"
                 placeholder="Konfirmasi Password Baru"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-5"
                 required>

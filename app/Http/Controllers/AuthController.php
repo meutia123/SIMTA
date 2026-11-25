@@ -3,10 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Password as PasswordBroker;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -52,7 +58,7 @@ class AuthController extends Controller
         Auth::login($user, $request->filled('remember'));
         $request->session()->regenerate();
 
-        switch (trim($user->role)) {
+        switch (strtolower(trim((string) $user->role))) {
             case 'mahasiswa':
                 return redirect()->route('dashboard');
 
@@ -79,6 +85,115 @@ class AuthController extends Controller
     public function showRegister()
     {
         return view('auth.register');
+    }
+
+    public function sendPasswordResetLink(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $status = PasswordBroker::sendResetLink($request->only('email'));
+
+        if (in_array($status, [PasswordBroker::RESET_LINK_SENT, PasswordBroker::INVALID_USER], true)) {
+            return back()->with('status', 'Jika email terdaftar, tautan reset password akan dikirim.');
+        }
+
+        throw ValidationException::withMessages([
+            'email' => [__($status)],
+        ]);
+    }
+
+    public function showResetPasswordForm(Request $request, string $token)
+    {
+        return view('auth.new-password', [
+            'token' => $token,
+            'email' => $request->query('email'),
+        ]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $validated = $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => ['required', 'confirmed', Password::min(8)],
+        ]);
+
+        $status = PasswordBroker::reset(
+            $validated,
+            function (User $user) use ($validated) {
+                $user->forceFill([
+                    'password' => Hash::make($validated['password']),
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        if ($status === PasswordBroker::PASSWORD_RESET) {
+            return redirect()->route('login')->with('success', __($status));
+        }
+
+        throw ValidationException::withMessages([
+            'email' => [__($status)],
+        ]);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'confirmed', Password::min(8)],
+        ]);
+
+        $request->user()->forceFill([
+            'password' => Hash::make($validated['password']),
+            'remember_token' => Str::random(60),
+        ])->save();
+
+        return redirect()->route('profil')->with('success', 'Password berhasil diperbarui.');
+    }
+
+    public function updateProfileData(Request $request)
+    {
+        $validated = $request->validate([
+            'angkatan' => ['required', 'integer', 'min:1980', 'max:' . (now()->year + 1)],
+            'program_studi' => 'required|string|max:150',
+            'no_hp' => ['required', 'string', 'max:20', 'regex:/^[0-9+\-\s()]+$/'],
+        ], [
+            'no_hp.regex' => 'Nomor HP hanya boleh berisi angka, spasi, tanda +, - atau tanda kurung.',
+        ]);
+
+        $request->user()->update($validated);
+
+        return redirect()->route('profil')->with('success', 'Data diri berhasil diperbarui.');
+    }
+
+    public function updateProfilePhoto(Request $request)
+    {
+        $validated = $request->validate([
+            'foto' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        $user = $request->user();
+        $fotoPath = $validated['foto']->store('profile-photos/' . $user->id, 'public');
+
+        if ($fotoPath === false) {
+            throw new \RuntimeException('Foto profil gagal disimpan.');
+        }
+
+        $oldFotoPath = $user->foto_path;
+        $user->update(['foto_path' => $fotoPath]);
+
+        if ($oldFotoPath && Storage::disk('public')->exists($oldFotoPath)) {
+            if (!Storage::disk('public')->delete($oldFotoPath)) {
+                Log::warning('Old profile photo could not be deleted.', ['user_id' => $user->id]);
+            }
+        }
+
+        return redirect()->route('profil')->with('success', 'Foto profil berhasil diperbarui.');
     }
 
     public function register(Request $request)
@@ -128,6 +243,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        return redirect()->route('logout.success');
     }
 }

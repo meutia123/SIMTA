@@ -16,14 +16,23 @@
         </h1>
 
         <p class="text-center text-sm text-gray-600 mt-2 mb-8">
-            Masukkan email yang terdaftar untuk menerima kode verifikasi
+            Masukkan email akun Anda untuk menerima tautan reset password
         </p>
 
-        <form action="{{ route('verify-otp') }}" method="GET">
+        @if(session('status'))
+            <div class="mb-4 rounded-lg bg-green-100 px-4 py-3 text-sm text-green-700">{{ session('status') }}</div>
+        @endif
+        @error('email')
+            <div class="mb-4 rounded-lg bg-red-100 px-4 py-3 text-sm text-red-700">{{ $message }}</div>
+        @enderror
+
+        <form action="{{ route('password.email') }}" method="POST">
+            @csrf
 
             <input
                 type="email"
                 name="email"
+                value="{{ old('email') }}"
                 placeholder="Masukkan Email"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-[#841719]"
                 required>

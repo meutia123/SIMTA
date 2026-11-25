@@ -42,9 +42,9 @@
             </p>
         </div>
 
-        <a href="#" class="bg-white text-green-700 rounded px-4 py-2
+        <a href="{{ route('prodi.pengajuan-tugas-akhir') }}" class="bg-white text-green-700 rounded px-4 py-2
                    text-xs font-bold whitespace-nowrap hover:bg-green-50">
-            Lihat Mahasiswa
+            Review Pengajuan
         </a>
     </div>
 

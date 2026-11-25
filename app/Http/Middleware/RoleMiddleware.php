@@ -11,10 +11,28 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, string $role): Response
     {
-        if (!Auth::check() || Auth::user()->role !== $role) {
+        $user = Auth::user();
+        if (!$user) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini.');
         }
 
-        return $next($request);
+        $userRole = strtolower(trim((string) $user->role));
+        if ($userRole === strtolower(trim($role))) {
+            return $next($request);
+        }
+
+        $dashboard = [
+            'mahasiswa' => 'dashboard',
+            'dosen' => 'dosen.dashboard',
+            'prodi' => 'prodi.dashboard',
+            'tu' => 'tu.dashboard',
+        ][$userRole] ?? null;
+
+        if ($dashboard) {
+            return redirect()->route($dashboard);
+        }
+
+        abort(403, 'Anda tidak memiliki akses ke halaman ini.');
+
     }
 }

@@ -202,72 +202,95 @@
 
 </div>
 
- {{-- Modal Unggah Dokumen --}}
-<div id="modalUnggahDokumen" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-xl w-full max-w-md mx-4 shadow-xl">
-        <div class="flex items-center justify-between p-5 border-b border-gray-200">
-            <h3 class="text-lg font-bold text-gray-800">Unggah Dokumen</h3>
-            <button type="button" id="btnTutupModal" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+{{-- Modal Unggah Dokumen --}}
+<div id="modalUnggahDokumen" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#e2e1ce] rounded-xl w-full max-w-3xl shadow-xl max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between px-6 sm:px-10 pt-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-[#841719] text-white flex items-center justify-center">
+                    <svg aria-hidden="true" class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0L7 9m5-5 5 5M5 15v4a1 1 0 001 1h12a1 1 0 001-1v-4" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-950">Unggah Dokumen</h3>
+            </div>
+            <button type="button" id="btnTutupModal" aria-label="Tutup modal"
+                class="text-gray-950 hover:text-[#841719] text-3xl leading-none">&times;</button>
         </div>
 
-        <form action="{{ route('dokumen.upload') }}" method="POST" enctype="multipart/form-data" class="p-5 space-y-5" id="formUnggahDokumen">
+        <div class="mx-6 sm:mx-10 mt-5 border-t border-gray-400/40"></div>
+
+        <form action="{{ route('dokumen.upload') }}" method="POST" enctype="multipart/form-data"
+            class="px-6 sm:px-10 py-5 sm:py-6 space-y-5" id="formUnggahDokumen">
             @csrf
 
-            <div>
-                <label class="block text-sm font-semibold mb-2">
-                    Nama Dokumen <span class="text-red-600">*</span>
-                </label>
-                <select name="nama_dokumen" id="selectNamaDokumen" required
-                    class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm bg-white focus:ring-2 focus:ring-[#841719] focus:outline-none">
-                    <option value="">Pilih nama dokumen</option>
-                    @foreach($dokumenWajib as $dw)
-                        @php
-                            $sudahAda = $documents->where('nama_dokumen', $dw['nama'])->first();
-                        @endphp
-                        @if(!$sudahAda)
-                            <option value="{{ $dw['nama'] }}">{{ $dw['nama'] }} (Wajib)</option>
-                        @endif
-                    @endforeach
-                    <option value="Lainnya">Lainnya (Tambahan)</option>
-                </select>
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="selectNamaDokumen" class="block text-sm font-semibold mb-2">
+                        Nama Dokumen <span class="text-red-700">*</span>
+                    </label>
+                    <select name="nama_dokumen" id="selectNamaDokumen" required
+                        class="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm bg-white focus:ring-2 focus:ring-[#841719] focus:outline-none">
+                        <option value="">Pilih nama dokumen</option>
+                        @foreach($dokumenWajib as $dw)
+                            @php
+                                $sudahAda = $documents->where('nama_dokumen', $dw['nama'])->first();
+                            @endphp
+                            @if(!$sudahAda)
+                                <option value="{{ $dw['nama'] }}">{{ $dw['nama'] }} (Wajib)</option>
+                            @endif
+                        @endforeach
+                        <option value="Lainnya">Lainnya (Tambahan)</option>
+                    </select>
+                </div>
+
+                <div id="divNamaDokumenLain" class="hidden">
+                    <label for="inputNamaDokumenLain" class="block text-sm font-semibold mb-2">
+                        Nama Dokumen Lainnya <span class="text-red-700">*</span>
+                    </label>
+                    <input type="text" name="nama_dokumen_lain" id="inputNamaDokumenLain"
+                        placeholder="Masukkan nama dokumen"
+                        class="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#841719] focus:outline-none">
+                </div>
+
+                <div>
+                    <label for="inputJenisDokumen" class="block text-sm font-semibold mb-2">
+                        Jenis Dokumen <span class="text-red-700">*</span>
+                    </label>
+                    <input type="text" name="jenis_dokumen" id="inputJenisDokumen"
+                        placeholder="Contoh: Proposal, Surat Keputusan"
+                        class="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#841719] focus:outline-none" required>
+                </div>
             </div>
 
-            <div id="divNamaDokumenLain" class="hidden">
-                <label class="block text-sm font-semibold mb-2">
-                    Nama Dokumen Lainnya <span class="text-red-600">*</span>
-                </label>
-                <input type="text" name="nama_dokumen_lain" id="inputNamaDokumenLain"
-                    placeholder="Masukkan nama dokumen"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#841719] focus:outline-none">
+            <div class="text-center">
+                <p class="text-sm font-semibold mb-4">Pilih file dokumen yang ingin diunggah</p>
+                <div class="bg-white border border-dashed border-gray-500 rounded-lg px-4 py-6 sm:py-7">
+                    <svg aria-hidden="true" class="w-8 h-8 mx-auto mb-3 text-[#841719]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zm0 0v6h6M8 13h3m-3 4h3m3-4h3m-3 4h3" />
+                    </svg>
+                    <label for="inputFile" class="inline-flex cursor-pointer bg-[#841719] hover:bg-[#6f1214] text-white text-sm font-semibold px-6 py-2 rounded-md">
+                        Pilih File
+                    </label>
+                    <input type="file" name="file" id="inputFile" accept=".pdf,.doc,.docx" required class="sr-only">
+                    <p class="text-xs text-gray-600 mt-3">Format: PDF, DOC, DOCX (Maksimal 10 MB)</p>
+                </div>
+                <div id="selectedFile" class="hidden mt-4 bg-white rounded-md px-4 py-2 flex items-center gap-3 text-left">
+                    <span class="bg-[#e21d2b] text-white text-[10px] font-bold px-1.5 py-1 rounded">FILE</span>
+                    <span id="selectedFileName" class="text-sm font-medium truncate flex-1"></span>
+                    <span id="selectedFileSize" class="text-xs text-gray-500 shrink-0"></span>
+                    <button type="button" id="btnHapusFile" aria-label="Hapus file yang dipilih"
+                        class="text-gray-700 hover:text-[#841719] text-xl leading-none">&times;</button>
+                </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-semibold mb-2">
-                    Jenis Dokumen <span class="text-red-600">*</span>
-                </label>
-                <input type="text" name="jenis_dokumen" id="inputJenisDokumen"
-                    placeholder="Contoh: Proposal, Surat Keputusan, dll"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#841719] focus:outline-none" required>
-            </div>
-
-            <div>
-                <label class="block text-sm font-semibold mb-2">
-                    File Dokumen <span class="text-red-600">*</span>
-                </label>
-                <input type="file" name="file" id="inputFile"
-                    accept=".pdf,.doc,.docx"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm bg-white focus:ring-2 focus:ring-[#841719] focus:outline-none" required>
-                <p class="text-xs text-gray-500 mt-1">Format: PDF, DOC, DOCX (Max 10MB)</p>
-            </div>
-
-            <div class="flex justify-end gap-3 pt-4 border-t">
+            <div class="flex justify-center gap-4 pt-2 sm:pt-4">
                 <button type="button" id="btnBatalModal"
-                    class="border border-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm">
+                    class="w-36 border border-[#841719] bg-white text-[#841719] hover:bg-red-50 px-5 py-2 rounded-md text-sm font-semibold">
                     Batal
                 </button>
-
                 <button type="submit"
-                    class="bg-[#841719] hover:bg-[#681315] text-white px-6 py-2.5 rounded-lg text-sm font-semibold">
+                    class="w-36 bg-[#841719] hover:bg-[#681315] text-white px-5 py-2 rounded-md text-sm font-semibold">
                     Unggah
                 </button>
             </div>
@@ -288,6 +311,11 @@
         const divNamaLain = document.getElementById('divNamaDokumenLain');
         const inputNamaLain = document.getElementById('inputNamaDokumenLain');
         const inputJenis = document.getElementById('inputJenisDokumen');
+        const inputFile = document.getElementById('inputFile');
+        const selectedFile = document.getElementById('selectedFile');
+        const selectedFileName = document.getElementById('selectedFileName');
+        const selectedFileSize = document.getElementById('selectedFileSize');
+        const btnHapusFile = document.getElementById('btnHapusFile');
 
         function bukaModal() {
             modal.classList.remove('hidden');
@@ -306,11 +334,31 @@
             document.getElementById('formUnggahDokumen').reset();
             divNamaLain.classList.add('hidden');
             inputNamaLain.removeAttribute('required');
+            selectedFile.classList.add('hidden');
+            selectedFileName.textContent = '';
+            selectedFileSize.textContent = '';
         }
 
         btnTambah.addEventListener('click', bukaModal);
         btnTutup.addEventListener('click', tutupModal);
         btnBatal.addEventListener('click', tutupModal);
+        inputFile.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) {
+                selectedFile.classList.add('hidden');
+                return;
+            }
+
+            selectedFileName.textContent = file.name;
+            selectedFileSize.textContent = '(' + (file.size / 1024).toFixed(0) + ' KB)';
+            selectedFile.classList.remove('hidden');
+        });
+        btnHapusFile.addEventListener('click', function() {
+            inputFile.value = '';
+            selectedFile.classList.add('hidden');
+            selectedFileName.textContent = '';
+            selectedFileSize.textContent = '';
+        });
 
         modal.addEventListener('click', function(e) {
             if (e.target === modal) {

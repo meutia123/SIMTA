@@ -25,6 +25,18 @@
                    class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.dashboard') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
                     🏠 Dashboard
                 </a>
+                <a href="{{ route('prodi.jadwal') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.jadwal*') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    ▣ Jadwal
+                </a>
+                <a href="{{ route('prodi.pengajuan-tugas-akhir') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.pengajuan-tugas-akhir*') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    📄 Pengajuan TA
+                </a>
+                <a href="{{ route('prodi.pengumuman') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.pengumuman*') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    ▤ Pengumuman
+                </a>
             </nav>
             <!-- IDENTITAS -->
             <div class="mt-auto pt-6">

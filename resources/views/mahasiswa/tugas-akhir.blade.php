@@ -102,37 +102,37 @@
         <div class="grid grid-cols-4 text-center gap-2">
 
             <div>
-                <div class="w-10 h-10 mx-auto rounded-full bg-gray-300 text-black flex items-center justify-center">
+                <div class="w-10 h-10 mx-auto rounded-full {{ $tugasAkhir ? 'bg-green-700 text-white' : 'bg-gray-300 text-black' }} flex items-center justify-center">
                     1
                 </div>
-                <p class="mt-2 text-sm text-gray-600">
+                <p class="mt-2 text-sm {{ $tugasAkhir ? 'font-semibold text-green-700' : 'text-gray-600' }}">
                     Pengajuan Judul
                 </p>
             </div>
 
             <div>
-                <div class="w-10 h-10 mx-auto rounded-full bg-gray-300 text-black flex items-center justify-center">
+                <div class="w-10 h-10 mx-auto rounded-full {{ $tugasAkhir?->dosen_pembimbing_1 && $tugasAkhir?->dosen_pembimbing_2 ? 'bg-green-700 text-white' : 'bg-gray-300 text-black' }} flex items-center justify-center">
                     2
                 </div>
-                <p class="mt-2 text-sm text-gray-600">
+                <p class="mt-2 text-sm {{ $tugasAkhir?->dosen_pembimbing_1 && $tugasAkhir?->dosen_pembimbing_2 ? 'font-semibold text-green-700' : 'text-gray-600' }}">
                     Penetapan Pembimbing
                 </p>
             </div>
 
             <div>
-                <div class="w-10 h-10 mx-auto rounded-full bg-gray-300 text-black flex items-center justify-center">
+                <div class="w-10 h-10 mx-auto rounded-full {{ $tugasAkhir?->jadwals?->contains(fn ($item) => $item->jenis === 'sempro' && $item->status === 'selesai') ? 'bg-green-700 text-white' : 'bg-gray-300 text-black' }} flex items-center justify-center">
                     3
                 </div>
-                <p class="mt-2 text-sm text-gray-600">
+                <p class="mt-2 text-sm {{ $tugasAkhir?->jadwals?->contains(fn ($item) => $item->jenis === 'sempro' && $item->status === 'selesai') ? 'font-semibold text-green-700' : 'text-gray-600' }}">
                     Seminar Proposal
                 </p>
             </div>
 
             <div>
-                <div class="w-10 h-10 mx-auto rounded-full bg-gray-300 text-black flex items-center justify-center">
+                <div class="w-10 h-10 mx-auto rounded-full {{ $tugasAkhir?->jadwals?->contains(fn ($item) => $item->jenis === 'sidang' && in_array($item->status, ['terjadwal', 'selesai'], true)) ? 'bg-green-700 text-white' : 'bg-gray-300 text-black' }} flex items-center justify-center">
                     4
                 </div>
-                <p class="mt-2 text-sm text-gray-600">
+                <p class="mt-2 text-sm {{ $tugasAkhir?->jadwals?->contains(fn ($item) => $item->jenis === 'sidang' && in_array($item->status, ['terjadwal', 'selesai'], true)) ? 'font-semibold text-green-700' : 'text-gray-600' }}">
                     Sidang
                 </p>
             </div>
@@ -169,19 +169,19 @@
 
             <tr class="border-b">
                 <td class="py-3 font-semibold">
-                    Pembimbing I
+                    Dosen Pembimbing I
                 </td>
                 <td>
-                    -
+                    {{ $tugasAkhir?->dosenPembimbing1?->name ?? 'Menunggu penetapan' }}
                 </td>
             </tr>
 
             <tr class="border-b">
                 <td class="py-3 font-semibold">
-                    Pembimbing II
+                    Dosen Pembimbing II
                 </td>
                 <td>
-                    -
+                    {{ $tugasAkhir?->dosenPembimbing2?->name ?? 'Menunggu penetapan' }}
                 </td>
             </tr>
 
@@ -190,7 +190,7 @@
                     Status
                 </td>
                 <td>
-                    <span class="bg-red-700 text-white px-3 py-1 rounded">
+                    <span class="rounded px-3 py-1 {{ $tugasAkhir?->status === 'Disetujui' ? 'bg-green-100 text-green-700' : ($tugasAkhir?->status === 'Ditolak' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') }}">
                         {{ $tugasAkhir->status ?? 'Belum Ada' }}
                     </span>
                 </td>
@@ -201,7 +201,7 @@
                     Catatan Prodi
                 </td>
                 <td>
-                    -
+                    {{ $tugasAkhir?->catatan_prodi ?? '-' }}
                 </td>
             </tr>
 

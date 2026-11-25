@@ -69,12 +69,10 @@
                         </p>
                     </div>
 
-                    <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button type="submit" title="Logout" class="text-red-300">
-                            ⇥
-                        </button>
-                    </form>
+                    <button type="button" id="btnLogout" title="Logout" aria-label="Logout"
+                        class="text-red-300 hover:text-white">
+                        ⇥
+                    </button>
                 </div>
             </div>
 
@@ -90,15 +88,26 @@
                         @yield('page-label', 'Dashboard')
                     </h2>
                     <p class="text-[9px] text-gray-200">
-                        Sistem Informasi Tugas Akhir
+                        @yield('page-description', 'Sistem Informasi Tugas Akhir')
                     </p>
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <input type="text" placeholder="Cari..."
-                           class="hidden md:block bg-[#4b5420] text-white placeholder-gray-200 rounded px-4 py-2 text-xs w-48">
+                    <form action="{{ route('cari') }}" method="GET" role="search">
+                        <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari..."
+                            aria-label="Cari tugas akhir, dokumen, jadwal, atau pengumuman"
+                            class="hidden md:block bg-[#4b5420] text-white placeholder-gray-200 rounded px-4 py-2 text-xs w-48">
+                    </form>
 
-                    <span class="text-sm">🔔</span>
+                    <a href="{{ route('notifikasi') }}" class="relative text-sm" aria-label="Notifikasi">
+                        🔔
+                        @php($unreadNotifications = Auth::user()->unreadNotifications()->count())
+                        @if($unreadNotifications > 0)
+                            <span class="absolute -right-2 -top-2 min-w-4 rounded-full bg-red-600 px-1 text-center text-[9px] text-white">
+                                {{ $unreadNotifications }}
+                            </span>
+                        @endif
+                    </a>
 
                     <div class="w-6 h-6 rounded-full bg-[#a34a4b] flex items-center justify-center text-xs">
                         {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
@@ -113,6 +122,68 @@
         </div>
     </div>
 </div>
+
+<div id="modalLogout" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/55 p-4"
+    role="dialog" aria-modal="true" aria-labelledby="logoutTitle">
+    <div class="w-full max-w-lg rounded-xl bg-[#e2e1ce] px-8 py-10 text-center shadow-xl sm:px-10">
+        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-[#841719]/20 text-[#841719]">
+            <svg aria-hidden="true" class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 17l5-5-5-5m5 5H3m9-9h6a2 2 0 012 2v14a2 2 0 01-2 2h-6" />
+            </svg>
+        </div>
+        <h2 id="logoutTitle" class="mt-7 text-xl font-bold text-black">Keluar dari SIMTA?</h2>
+        <p class="mx-auto mt-4 max-w-xs text-xs leading-relaxed text-gray-800">
+            Kamu akan keluar dari akun. Pastikan data yang kamu isi sudah tersimpan.
+        </p>
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+            <button type="button" id="btnBatalLogout"
+                class="w-full rounded-md border border-gray-300 bg-white px-5 py-2 text-sm font-semibold text-black hover:bg-gray-50">
+                Batal
+            </button>
+            <form action="{{ route('logout') }}" method="POST" class="w-full">
+                @csrf
+                <button type="submit"
+                    class="w-full rounded-md bg-[#841719] px-5 py-2 text-sm font-semibold text-white hover:bg-[#6f1214]">
+                    Ya, Logout
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
 @stack('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('modalLogout');
+        const openButton = document.getElementById('btnLogout');
+        const cancelButton = document.getElementById('btnBatalLogout');
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        openButton.addEventListener('click', function() {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+            cancelButton.focus();
+        });
+
+        cancelButton.addEventListener('click', closeModal);
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeModal();
+                openButton.focus();
+            }
+        });
+    });
+</script>
 </body>
 </html>

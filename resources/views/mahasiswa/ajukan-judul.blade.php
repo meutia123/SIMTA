@@ -81,7 +81,7 @@
                         Pilihan Dosen Pembimbing
                     </h3>
                     <p class="text-xs text-gray-500 mb-4">
-                        Pilih tiga calon dosen pembimbing sesuai preferensi Anda.
+                        Pilih dua calon dosen pembimbing sesuai preferensi Anda.
                     </p>
 
                     @for($i = 1; $i <= 2; $i++)
