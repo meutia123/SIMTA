@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -335,6 +336,25 @@ Route::middleware('auth')->group(function () {
 
     return view('dosen.profil', compact('profil'));
     })->name('dosen.profil');
+Route::post('/dosen/profil/foto', function (Request $request) {
+        abort_unless(
+            strtolower(trim((string) auth()->user()->role)) === 'dosen',
+            403
+        );
+
+        $request->validate([
+            'foto' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        $foto = $request->file('foto')->store('profil-dosen', 'public');
+
+        auth()->user()->update([
+            'foto' => $foto,
+        ]);
+
+        return back()->with('success', 'Foto profil berhasil diperbarui.');
+    })->name('dosen.profil.foto');
+});
 
     Route::get('/prodi/dashboard', function () {
         abort_unless(
@@ -376,4 +396,3 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
-});
