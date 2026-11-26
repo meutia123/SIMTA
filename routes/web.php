@@ -62,6 +62,13 @@ Route::middleware('auth')->group(function () {
             'mahasiswaTerbaru' => collect(),
         ]);
     })->name('dosen.dashboard');
+    Route::get('/dosen/mahasiswa-saya', function () {
+    abort_unless(
+        strtolower(trim((string) auth()->user()->role)) === 'dosen',
+        403
+    );
+        return view('dosen.mahasiswa-saya');
+        })->name('dosen.mahasiswa-saya');
 
     Route::get('/prodi/dashboard', function () {
         abort_unless(

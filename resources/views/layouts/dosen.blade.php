@@ -35,7 +35,8 @@
                     <span>Dashboard</span>
                 </a>
 
-                <a href="#" class="flex gap-2 rounded px-3 py-2 hover:bg-black/10">
+                <a href="{{ route('dosen.mahasiswa-saya') }}"
+                   class="flex gap-2 rounded px-3 py-2 {{ request()->routeIs('dosen.mahasiswa-saya') ? 'border border-white/30 bg-[#a51d22]' : 'hover:bg-black/10' }}">
                     <span>♟</span>
                     <span>Mahasiswa Saya</span>
                 </a>
