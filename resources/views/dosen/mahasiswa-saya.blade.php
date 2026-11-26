@@ -9,7 +9,7 @@
         $mahasiswa = [
             [
                 'nama' => 'Dia Febi Ayu',
-                'nim' => '2417020078',
+                'nim' => '2417020076',
                 'judul' => 'Rancang Bangun Sistem Informasi Tugas Akhir',
                 'peran' => 'Pembimbing I',
                 'status' => 'Sempro',
@@ -107,15 +107,10 @@
                         </td>
 
                         <td class="px-4 py-5 text-center">
-                            <button type="button"
-                                    class="detail-button rounded-lg border border-gray-400 px-5 py-1.5 text-xs"
-                                    data-nama="{{ $item['nama'] }}"
-                                    data-nim="{{ $item['nim'] }}"
-                                    data-judul="{{ $item['judul'] }}"
-                                    data-peran="{{ $item['peran'] }}"
-                                    data-status="{{ $item['status'] }}">
+                            <a href="{{ route('dosen.mahasiswa-saya.detail', ['nim' => $item['nim']]) }}"
+                               class="inline-block rounded-lg border border-gray-400 px-5 py-1.5 text-xs text-gray-900 hover:bg-gray-100">
                                 Detail
-                            </button>
+                            </a>
                         </td>
                     </tr>
                 @endforeach
@@ -124,7 +119,7 @@
     </div>
 </div>
 
-{{-- Modal detail --}}
+{{-- Modal detail dipertahankan --}}
 <div id="detail-modal"
      class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
     <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">

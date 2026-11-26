@@ -2,7 +2,8 @@
 
 @section('title', 'Dashboard Dosen - SIMTA')
 @section('page-label', 'Dashboard Dosen')
-
+@section('header-title', 'Dashboard Dosen')
+@section('header-subtitle', 'Ringkasan Mahasiswa dan Jadwal Kamu')
 @section('content')
 <div class="space-y-5">
     <div class="bg-[#a51d22] text-white rounded-lg p-6 flex items-center justify-between">
@@ -13,8 +14,7 @@
                 Pantau mahasiswa, jadwal seminar dan sidang, serta kelangsungan bimbingan.
             </p>
         </div>
-
-        <a href="#" class="bg-white text-blue-700 font-semibold text-sm px-5 py-3 rounded-lg">
+        <a href="{{ route('dosen.mahasiswa-saya') }}" class="bg-white text-blue-700 font-semibold text-sm px-5 py-3 rounded-lg">
             👥 &nbsp;Lihat Mahasiswa Saya
         </a>
     </div>
@@ -69,30 +69,25 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y">
-                        @forelse(($mahasiswaTerbaru ?? collect()) as $index => $tugas)
-                            <tr>
-                                <td class="py-4">{{ $index + 1 }}</td>
-                                <td class="font-medium">{{ $tugas->mahasiswa->name ?? '-' }}</td>
-                                <td>{{ $tugas->judul ?? '-' }}</td>
-                                <td>Pembimbing</td>
-                                <td>
-                                    <span class="px-2 py-1 rounded text-white
-                                        {{ str_contains(strtolower($tugas->status ?? ''), 'sidang')
-                                            ? 'bg-green-500'
-                                            : (str_contains(strtolower($tugas->status ?? ''), 'sempro')
-                                                ? 'bg-yellow-500'
-                                                : 'bg-blue-500') }}">
-                                        {{ $tugas->status ?? '-' }}
-                                    </span>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="py-8 text-center text-gray-400">
-                                    Belum ada mahasiswa bimbingan.
-                                </td>
-                            </tr>
-                        @endforelse
+                       @forelse(($mahasiswaTerbaru ?? collect()) as $index => $tugas)
+                       <tr>
+                        <td class="py-4">{{ $index + 1 }}</td>
+                        <td class="font-medium">{{ $tugas['nama'] ?? '-' }}</td>
+                        <td>{{ $tugas['judul'] ?? '-' }}</td>
+                        <td>Pembimbing</td>
+                        <td>
+                            <span class="rounded bg-blue-500 px-2 py-1 text-white">
+                            {{ $tugas['status'] ?? '-' }}
+                        </span>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="py-8 text-center text-gray-400">
+                        Belum ada mahasiswa bimbingan.
+                    </td>
+                </tr>
+                @endforelse
                     </tbody>
                 </table>
             </div>
