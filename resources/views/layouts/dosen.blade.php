@@ -36,17 +36,19 @@
                 </a>
 
                 <a href="{{ route('dosen.mahasiswa-saya') }}"
-                   class="flex gap-2 rounded px-3 py-2 {{ request()->routeIs('dosen.mahasiswa-saya') ? 'border border-white/30 bg-[#a51d22]' : 'hover:bg-black/10' }}">
+                   class="flex gap-2 rounded px-3 py-2 {{ request()->routeIs('dosen.mahasiswa-saya*') ? 'border border-white/30 bg-[#a51d22]' : 'hover:bg-black/10' }}">
                     <span>♟</span>
                     <span>Mahasiswa Saya</span>
                 </a>
 
-                <a href="#" class="flex gap-2 rounded px-3 py-2 hover:bg-black/10">
+                <a href="{{ route('dosen.jadwal') }}"
+                   class="flex gap-2 rounded px-3 py-2 {{ request()->routeIs('dosen.jadwal') ? 'border border-white/30 bg-[#a51d22]' : 'hover:bg-black/10' }}">
                     <span>▣</span>
                     <span>Jadwal</span>
                 </a>
 
-                <a href="#" class="flex gap-2 rounded px-3 py-2 hover:bg-black/10">
+                <a href="{{ route('dosen.input-nilai') }}"
+                   class="flex gap-2 rounded px-3 py-2 {{ request()->routeIs('dosen.input-nilai*') ? 'border border-white/30 bg-[#a51d22]' : 'hover:bg-black/10' }}">
                     <span>▤</span>
                     <span>Input Nilai</span>
                 </a>
@@ -77,26 +79,30 @@
                     <p class="truncate text-[10px]">{{ auth()->user()->name }}</p>
                 </div>
 
-                <form action="{{ route('logout') }}" method="POST" class="ml-auto">
-                    @csrf
-                    <button type="submit" title="Logout" class="text-red-200">⇥</button>
-                </form>
+                <button type="button"
+                        id="logout-open"
+                        title="Logout"
+                        class="ml-auto text-red-200">
+                    ⇥
+                </button>
             </div>
         </aside>
 
         <main class="min-w-0 flex-1 bg-[#f6f5fa]">
             <header class="flex min-h-20 items-center justify-between gap-3 border-b bg-white px-3 sm:px-4 md:px-6">
                 <div class="min-w-0">
-                    <h1 class="text-lg font-bold md:text-xl">Dashboard Dosen</h1>
+                    <h1 class="text-lg font-bold md:text-xl">
+                        @yield('header-title', 'Dashboard Dosen')
+                    </h1>
                     <p class="text-xs text-gray-500">
-                        Ringkasan Mahasiswa dan Jadwal Kamu
+                        @yield('header-subtitle', 'Ringkasan Mahasiswa dan Jadwal Kamu')
                     </p>
                 </div>
 
                 <div class="flex shrink-0 items-center gap-2 sm:gap-3">
                     <input type="search"
                            placeholder="Cari..."
-                           class="hidden w-64 rounded px-4 py-2 text-xs text-white bg-[#53632c] placeholder:text-gray-200 lg:block">
+                           class="hidden w-64 rounded bg-[#53632c] px-4 py-2 text-xs text-white placeholder:text-gray-200 lg:block">
 
                     <button type="button"
                             class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50 text-red-700">
@@ -115,5 +121,59 @@
         </main>
     </div>
 </div>
+
+{{-- Modal konfirmasi logout --}}
+<div id="logout-modal"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+    <div class="w-full max-w-lg rounded-2xl bg-[#e7e5d2] p-8 text-center shadow-xl">
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-[#d9b8ad] text-3xl text-[#a51d22]">
+            ⇥
+        </div>
+
+        <h2 class="text-xl font-bold">Keluar dari SIMTA?</h2>
+        <p class="mx-auto mt-2 max-w-xs text-xs text-gray-700">
+            Kamu akan keluar dari akun dan sesi yang sudah tersimpan akan berakhir.
+        </p>
+
+        <div class="mt-8 grid grid-cols-2 gap-3">
+            <button type="button"
+                    id="logout-cancel"
+                    class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50">
+                Batal
+            </button>
+
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit"
+                        class="w-full rounded-md bg-[#a51d22] px-4 py-2 text-sm font-semibold text-white hover:bg-red-900">
+                    Ya, Logout
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const logoutModal = document.getElementById('logout-modal');
+    const logoutOpen = document.getElementById('logout-open');
+    const logoutCancel = document.getElementById('logout-cancel');
+
+    logoutOpen.addEventListener('click', () => {
+        logoutModal.classList.remove('hidden');
+        logoutModal.classList.add('flex');
+    });
+
+    logoutCancel.addEventListener('click', () => {
+        logoutModal.classList.add('hidden');
+        logoutModal.classList.remove('flex');
+    });
+
+    logoutModal.addEventListener('click', (event) => {
+        if (event.target === logoutModal) {
+            logoutModal.classList.add('hidden');
+            logoutModal.classList.remove('flex');
+        }
+    });
+</script>
 </body>
 </html>

@@ -79,7 +79,7 @@
                                     <span class="px-2 py-1 rounded text-white
                                         {{ str_contains(strtolower($tugas->status ?? ''), 'sidang')
                                             ? 'bg-green-500'
-                                            : (str_contains(strtolower($tugas->status ?? ''), 'sempro')
+                                            : (str_contains(strtolower($tugas->status ?? ''), 'Seminar Proposal')
                                                 ? 'bg-yellow-500'
                                                 : 'bg-blue-500') }}">
                                         {{ $tugas->status ?? '-' }}
