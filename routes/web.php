@@ -47,73 +47,48 @@ Route::middleware('auth')->group(function () {
         };
     })->name('dashboard');
 
-    Route::get('/dosen/dashboard', function () {
-        abort_unless(
-            strtolower(trim((string) auth()->user()->role)) === 'dosen',
-            403,
-            'Halaman ini hanya untuk dosen.'
-        );
+  Route::get('/dosen/dashboard', function () {
+    abort_unless(
+        strtolower(trim((string) auth()->user()->role)) === 'dosen',
+        403,
+        'Halaman ini hanya untuk dosen.'
+    );
 
-        $dashboard = [
-            'mahasiswa_baru' => [
-                [
-                    'nama' => 'Dia Febi Ayu',
-                    'nim' => '2417020076',
-                    'judul' => 'Rancang Bangun Sistem Informasi Tugas Akhir',
-                ],
-                [
-                    'nama' => 'Elva Fitri',
-                    'nim' => '2417020058',
-                    'judul' => 'Analisis Kepuasan Pengguna Aplikasi Akademik',
-                ],
-                [
-                    'nama' => 'Meutia Sandrina',
-                    'nim' => '2417020096',
-                    'judul' => 'Sistem Pendukung Keputusan Pemilihan Dosen',
-                ],
-                [
-                    'nama' => 'Zoria Fitrioca',
-                    'nim' => '2417020095',
-                    'judul' => 'Implementasi E-Learning Berbasis Web',
-                ],
-            ],
-            'jadwal_terdekat' => [
-                [
-                    'tanggal' => '2',
-                    'bulan' => 'Des',
-                    'kegiatan' => 'Sempro',
-                    'nama' => 'Dia Febi Ayu',
-                    'lokasi' => '09.00 Ruang Seminar 1',
-                ],
-                [
-                    'tanggal' => '20',
-                    'bulan' => 'Jul',
-                    'kegiatan' => 'Sidang',
-                    'nama' => 'Meutia Sandrina',
-                    'lokasi' => '09.00 Ruang Sidang',
-                ],
-            ],
-            'pengumuman' => [
-                [
-                    'judul' => 'Jadwal Sidang Tugas Akhir Gelombang 2',
-                    'tanggal' => '15 Mei 2026',
-                ],
-                [
-                    'judul' => 'Rekap Keterlibatan Dosen Periode Agustus',
-                    'tanggal' => '10 Mei 2026',
-                ],
-            ],
-        ];
+    $mahasiswaTerbaru = collect([
+        [
+            'nama' => 'Dia Febi Ayu',
+            'nim' => '2417020076',
+            'judul' => 'Rancang Bangun Sistem Informasi Tugas Akhir',
+            'status' => 'Sempro',
+        ],
+        [
+            'nama' => 'Elva Fitri',
+            'nim' => '2417020058',
+            'judul' => 'Analisis Kepuasan Pengguna Aplikasi Akademik',
+            'status' => 'Pembimbing Ditentukan',
+        ],
+        [
+            'nama' => 'Meutia Sandrina',
+            'nim' => '2417020096',
+            'judul' => 'Sistem Pendukung Keputusan Pemilihan Dosen',
+            'status' => 'Sidang',
+        ],
+        [
+            'nama' => 'Zoria Fitrioca',
+            'nim' => '2417020095',
+            'judul' => 'Implementasi E-Learning Berbasis Web',
+            'status' => 'Pengajuan Judul',
+        ],
+    ]);
 
-        return view('dosen.dashboard', [
-            'dashboard' => $dashboard,
-            'mahasiswaSaya' => count($dashboard['mahasiswa_baru']),
-            'pengujiSempro' => 0,
-            'pengujiSidang' => 0,
-            'jadwalHariIni' => 0,
-            'mahasiswaTerbaru' => collect($dashboard['mahasiswa_baru']),
-        ]);
-    })->name('dosen.dashboard');
+    return view('dosen.dashboard', [
+        'mahasiswaSaya' => $mahasiswaTerbaru->count(),
+        'pengujiSempro' => 0,
+        'pengujiSidang' => 0,
+        'jadwalHariIni' => 0,
+        'mahasiswaTerbaru' => $mahasiswaTerbaru,
+    ]);
+})->name('dosen.dashboard');
 
     Route::get('/dosen/mahasiswa-saya', function () {
         abort_unless(
@@ -286,22 +261,80 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('dosen.input-nilai');
 
-    Route::get('/dosen/input-nilai/sempro/{nama}', function ($nama) {
-        abort_unless(
-            strtolower(trim((string) auth()->user()->role)) === 'dosen',
-            403
-        );
+    Route::get('/dosen/rekap-keterlibatan', function () {
+    abort_unless(
+        strtolower(trim((string) auth()->user()->role)) === 'dosen',
+        403
+    );
 
-        $penilaian = [
-            'nama' => urldecode($nama),
-            'kegiatan' => 'Seminar Proposal',
-            'tanggal' => '2 Juni 2026',
-            'peran' => 'Pembimbing 1',
-            'status' => 'Belum Dinilai',
-        ];
+    $rekap = [
+        ['peran' => 'Pembimbing I', 'mahasiswa' => 'Dia Febi Ayu', 'tanggal' => '12 Jan 2026'],
+        ['peran' => 'Pembimbing I', 'mahasiswa' => 'Nadia Putri', 'tanggal' => '12 Jan 2026'],
+        ['peran' => 'Pembimbing II', 'mahasiswa' => 'Meutia Sandrina', 'tanggal' => '12 Jan 2026'],
+        ['peran' => 'Penguji Sempro', 'mahasiswa' => 'Fajar Ramadhan', 'tanggal' => '5 Feb 2026'],
+        ['peran' => 'Penguji Sempro', 'mahasiswa' => 'Safira Amalia', 'tanggal' => '6 Feb 2026'],
+        ['peran' => 'Penguji Sidang', 'mahasiswa' => 'Meutia Sandrina', 'tanggal' => '10 Mar 2026'],
+    ];
 
-        return view('dosen.input-nilai-sempro', compact('penilaian'));
-    })->name('dosen.input-nilai.sempro');
+    return view('dosen.rekap-keterlibatan', compact('rekap'));
+    })->name('dosen.rekap-keterlibatan');
+    
+    Route::get('/dosen/sk-dokumen', function () {
+    abort_unless(
+        strtolower(trim((string) auth()->user()->role)) === 'dosen',
+        403
+    );
+
+    $skDokumen = [
+        [
+            'jenis' => 'SK Pembimbing',
+            'mahasiswa' => 'Meutia Sandrina',
+            'nomor' => '123/Un.13/2026',
+            'tanggal' => '12 Jan 2026',
+            'status' => 'Tersedia',
+        ],
+        [
+            'jenis' => 'SK Pembimbing',
+            'mahasiswa' => 'Zoria Fitrioca',
+            'nomor' => '124/Un.13/2026',
+            'tanggal' => '12 Jan 2026',
+            'status' => 'Tersedia',
+        ],
+        [
+            'jenis' => 'SK Tim Penguji',
+            'mahasiswa' => 'Dia Febi Ayu',
+            'nomor' => '201/Un.13/2026',
+            'tanggal' => '20 Mei 2026',
+            'status' => 'Tersedia',
+        ],
+        [
+            'jenis' => 'SK Tim Penguji',
+            'mahasiswa' => 'Nadia Putri',
+            'nomor' => '202/Un.13/2026',
+            'tanggal' => '20 Mei 2026',
+            'status' => 'Tersedia',
+        ],
+    ];
+
+    return view('dosen.sk-dokumen', compact('skDokumen'));
+    })->name('dosen.sk-dokumen');
+
+    Route::get('/dosen/profil', function () {
+    abort_unless(
+        strtolower(trim((string) auth()->user()->role)) === 'dosen',
+        403
+    );
+
+    $profil = [
+        'nidn' => '0800000000',
+        'nama' => auth()->user()->name ?? 'Nama Dosen',
+        'program_studi' => 'Sistem Informasi',
+        'email' => auth()->user()->email ?? 'dosen@gmail.com',
+        'no_hp' => '0813345267801',
+    ];
+
+    return view('dosen.profil', compact('profil'));
+    })->name('dosen.profil');
 
     Route::get('/prodi/dashboard', function () {
         abort_unless(

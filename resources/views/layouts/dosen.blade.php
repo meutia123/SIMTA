@@ -53,20 +53,19 @@
                     <span>Input Nilai</span>
                 </a>
 
-                <a href="#" class="flex gap-2 rounded px-3 py-2 hover:bg-black/10">
-                    <span>▥</span>
-                    <span>Rekap Keberhasilan</span>
-                </a>
+                <a href="{{ route('dosen.sk-dokumen') }}"
+                class="flex gap-2 rounded px-3 py-2
+                {{ request()->routeIs('dosen.sk-dokumen') ? 'border border-white/30 bg-[#a51d22]' : 'hover:bg-black/10' }}">
+                <span>▣</span>
+                <span>SK & Dokumen</span>
+            </a>
 
-                <a href="#" class="flex gap-2 rounded px-3 py-2 hover:bg-black/10">
-                    <span>▧</span>
-                    <span>SK &amp; Dokumen</span>
-                </a>
-
-                <a href="#" class="flex gap-2 rounded px-3 py-2 hover:bg-black/10">
-                    <span>♟</span>
-                    <span>Profil</span>
-                </a>
+                <a href="{{ route('dosen.profil') }}"
+                class="flex gap-2 rounded px-3 py-2
+                {{ request()->routeIs('dosen.profil') ? 'border border-white/30 bg-[#a51d22]' : 'hover:bg-black/10' }}">
+                <span>♟</span>
+                <span>Profil</span>
+            </a>
             </nav>
 
             <div class="mt-4 flex items-center gap-2 border-t border-white/20 pt-3 text-xs md:mt-auto md:pt-4">
