@@ -19,11 +19,12 @@ class MahasiswaFeaturesTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_student_can_submit_a_task_title_with_two_distinct_advisors(): void
+    public function test_student_can_submit_a_task_title_with_three_distinct_advisor_candidates(): void
     {
         $student = User::factory()->create(['role' => 'mahasiswa']);
         $advisorOne = User::factory()->create(['role' => 'dosen']);
         $advisorTwo = User::factory()->create(['role' => 'dosen']);
+        $advisorThree = User::factory()->create(['role' => 'dosen']);
 
         $this->actingAs($student)
             ->post(route('tugas-akhir.store'), [
@@ -32,6 +33,7 @@ class MahasiswaFeaturesTest extends TestCase
                 'deskripsi' => 'Pengembangan aplikasi akademik.',
                 'calon_dosen_1' => $advisorOne->id,
                 'calon_dosen_2' => $advisorTwo->id,
+                'calon_dosen_3' => $advisorThree->id,
             ])
             ->assertRedirect(route('tugas-akhir'));
 
@@ -40,6 +42,7 @@ class MahasiswaFeaturesTest extends TestCase
             'judul' => 'Aplikasi Informasi Akademik',
             'calon_dosen_1' => $advisorOne->id,
             'calon_dosen_2' => $advisorTwo->id,
+            'calon_dosen_3' => $advisorThree->id,
             'status' => 'Menunggu',
         ]);
     }
@@ -207,7 +210,7 @@ class MahasiswaFeaturesTest extends TestCase
         $this->actingAs($student)
             ->get(route('tugas-akhir.daftar-sidang'))
             ->assertOk()
-            ->assertSee('Seminar Proposal harus ditandai selesai');
+            ->assertSee('Sempro terbaru harus selesai dan dinyatakan Lulus');
         $jadwal = Jadwal::where('user_id', $student->id)->firstOrFail();
         $this->assertSame('menunggu', $jadwal->status);
 
@@ -248,9 +251,12 @@ class MahasiswaFeaturesTest extends TestCase
         ]);
 
         $this->actingAs($prodi)
-            ->get(route('prodi.pengajuan-tugas-akhir'))
+            ->get(route('prodi.pengajuan-tugas-akhir', [
+                'status' => 'Menunggu',
+                'q' => 'Sistem Informasi',
+            ]))
             ->assertOk()
-            ->assertSee('Simpan Review')
+            ->assertSee('Periksa')
             ->assertSee('Sistem Informasi');
 
         $this->actingAs($prodi)
@@ -270,6 +276,189 @@ class MahasiswaFeaturesTest extends TestCase
             'catatan_prodi' => 'Judul diterima.',
         ]);
         $this->assertSame(1, $student->notifications()->count());
+    }
+
+    public function test_prodi_can_request_revisions_and_student_resubmits_the_same_application(): void
+    {
+        $student = User::factory()->create(['role' => 'mahasiswa']);
+        $otherStudent = User::factory()->create(['role' => 'mahasiswa']);
+        $prodi = User::factory()->create(['role' => 'prodi']);
+        $advisorOne = User::factory()->create(['role' => 'dosen']);
+        $advisorTwo = User::factory()->create(['role' => 'dosen']);
+        $advisorThree = User::factory()->create(['role' => 'dosen']);
+        $application = TugasAkhir::create([
+            'user_id' => $student->id,
+            'judul' => 'Sistem Informasi Perpustakaan',
+            'topik' => 'Sistem Informasi',
+            'status' => 'Menunggu',
+        ]);
+        TugasAkhir::create([
+            'user_id' => $otherStudent->id,
+            'judul' => 'Sistem Informasi Perpustakaan Digital',
+            'topik' => 'Sistem Informasi',
+            'status' => 'Disetujui',
+        ]);
+
+        $this->actingAs($prodi)
+            ->get(route('prodi.pengajuan-tugas-akhir.review', $application))
+            ->assertOk()
+            ->assertSee('Sistem Informasi Perpustakaan Digital')
+            ->assertSee('Kemiripan');
+
+        $this->actingAs($prodi)
+            ->put(route('prodi.pengajuan-tugas-akhir.update', $application), [
+                'status' => 'Perlu Perbaikan',
+                'catatan_prodi' => 'Perjelas ruang lingkup penelitian.',
+            ])
+            ->assertRedirect(route('prodi.pengajuan-tugas-akhir'));
+
+        $this->actingAs($student)
+            ->get(route('tugas-akhir.ajukan-judul'))
+            ->assertOk()
+            ->assertSee('Kirim Ulang Perbaikan')
+            ->assertSee('Perjelas ruang lingkup penelitian.');
+
+        $this->actingAs($student)
+            ->post(route('tugas-akhir.store'), [
+                'judul' => 'Sistem Informasi Perpustakaan Berbasis Web',
+                'topik' => 'Sistem Informasi',
+                'deskripsi' => 'Pengelolaan sirkulasi buku.',
+                'calon_dosen_1' => $advisorOne->id,
+                'calon_dosen_2' => $advisorTwo->id,
+                'calon_dosen_3' => $advisorThree->id,
+            ])
+            ->assertRedirect(route('tugas-akhir'));
+
+        $this->assertDatabaseCount('tugas_akhirs', 2);
+        $this->assertDatabaseHas('tugas_akhirs', [
+            'id' => $application->id,
+            'judul' => 'Sistem Informasi Perpustakaan Berbasis Web',
+            'status' => 'Menunggu',
+            'catatan_prodi' => null,
+        ]);
+    }
+
+    public function test_prodi_can_approve_a_title_then_assign_advisors_on_the_separate_screen(): void
+    {
+        $student = User::factory()->create(['role' => 'mahasiswa']);
+        $prodi = User::factory()->create(['role' => 'prodi']);
+        $advisorOne = User::factory()->create(['role' => 'dosen']);
+        $advisorTwo = User::factory()->create(['role' => 'dosen']);
+        $application = TugasAkhir::create([
+            'user_id' => $student->id,
+            'judul' => 'Analisis Data Akademik',
+            'topik' => 'Data Mining',
+            'status' => 'Menunggu',
+        ]);
+
+        $this->actingAs($prodi)
+            ->put(route('prodi.pengajuan-tugas-akhir.update', $application), [
+                'status' => 'Disetujui',
+            ])
+            ->assertRedirect(route('prodi.pengajuan-tugas-akhir'));
+
+        $this->assertDatabaseHas('tugas_akhirs', [
+            'id' => $application->id,
+            'status' => 'Disetujui',
+            'dosen_pembimbing_1' => null,
+            'dosen_pembimbing_2' => null,
+        ]);
+
+        $this->actingAs($prodi)
+            ->get(route('prodi.pengajuan-tugas-akhir.pembimbing', $application))
+            ->assertOk()
+            ->assertSee('Penetapan Pembimbing');
+
+        $this->actingAs($prodi)
+            ->put(route('prodi.pengajuan-tugas-akhir.pembimbing.update', $application), [
+                'dosen_pembimbing_1' => $advisorOne->id,
+                'dosen_pembimbing_2' => $advisorTwo->id,
+            ])
+            ->assertRedirect(route('prodi.pengajuan-tugas-akhir'));
+
+        $this->assertDatabaseHas('tugas_akhirs', [
+            'id' => $application->id,
+            'dosen_pembimbing_1' => $advisorOne->id,
+            'dosen_pembimbing_2' => $advisorTwo->id,
+        ]);
+    }
+
+    public function test_dosen_submits_sempro_score_and_student_sees_it_after_prodi_validation(): void
+    {
+        $student = User::factory()->create(['role' => 'mahasiswa']);
+        $prodi = User::factory()->create(['role' => 'prodi']);
+        $dosen = User::factory()->create(['role' => 'dosen', 'name' => 'Dosen Penilai']);
+        $application = TugasAkhir::create([
+            'user_id' => $student->id,
+            'judul' => 'Analisis Sentimen',
+            'topik' => 'Data Mining',
+            'status' => 'Disetujui',
+            'dosen_pembimbing_1' => $dosen->id,
+            'dosen_pembimbing_2' => User::factory()->create(['role' => 'dosen'])->id,
+        ]);
+        $sempro = Jadwal::create([
+            'user_id' => $student->id,
+            'tugas_akhir_id' => $application->id,
+            'jenis' => 'sempro',
+            'waktu' => now()->subDay(),
+            'status' => 'selesai',
+        ]);
+
+        $this->actingAs($prodi)
+            ->get(route('prodi.sempro'))
+            ->assertOk()
+            ->assertSee('Analisis Sentimen')
+            ->assertSee('Menunggu nilai dari dosen');
+
+        $this->actingAs($dosen)
+            ->post(route('dosen.nilai.store', $sempro), [
+                'nilai_presentasi' => 101,
+                'nilai_naskah' => 88,
+                'nilai_penguasaan' => 90,
+                'hasil' => 'Lulus',
+            ])
+            ->assertSessionHasErrors('nilai_presentasi');
+
+        $this->actingAs($dosen)
+            ->post(route('dosen.nilai.store', $sempro), [
+                'nilai_presentasi' => 85,
+                'nilai_naskah' => 88,
+                'nilai_penguasaan' => 90,
+                'hasil' => 'Lulus',
+            ])
+            ->assertRedirect(route('dosen.jadwal'));
+
+        $this->assertSame('menunggu_validasi', $sempro->fresh()->status_validasi_nilai);
+        $this->assertEquals(87.67, (float) $sempro->fresh()->nilai);
+
+        $this->actingAs($student)
+            ->get(route('tugas-akhir.daftar-sempro'))
+            ->assertOk()
+            ->assertSee('Menunggu Validasi Prodi')
+            ->assertDontSee('87.67');
+
+        $this->actingAs($prodi)
+            ->get(route('prodi.validasi-nilai', ['status' => 'menunggu_validasi']))
+            ->assertOk()
+            ->assertSee('Dosen Penilai')
+            ->assertSee('Periksa');
+
+        $this->get(route('prodi.validasi-nilai.show', $sempro))
+            ->assertOk()
+            ->assertSee('Presentasi')
+            ->assertSee('85.00')
+            ->assertSee('88.00')
+            ->assertSee('90.00');
+
+        $this->patch(route('prodi.validasi-nilai.validate', $sempro))
+            ->assertRedirect(route('prodi.validasi-nilai.show', $sempro));
+
+        $this->assertSame('tervalidasi', $sempro->fresh()->status_validasi_nilai);
+        $this->actingAs($student)
+            ->get(route('tugas-akhir.daftar-sempro'))
+            ->assertOk()
+            ->assertSee('Lulus')
+            ->assertSee('87.67');
     }
 
     public function test_prodi_cannot_create_a_sempro_schedule_without_a_student_registration(): void
@@ -296,7 +485,7 @@ class MahasiswaFeaturesTest extends TestCase
         $this->assertDatabaseCount('jadwals', 0);
     }
 
-    public function test_sidang_registration_requires_a_completed_sempro(): void
+    public function test_final_exam_registration_requires_a_passed_sempro(): void
     {
         $student = User::factory()->create(['role' => 'mahasiswa']);
         $prodi = User::factory()->create(['role' => 'prodi']);
@@ -325,6 +514,7 @@ class MahasiswaFeaturesTest extends TestCase
             'dosen_penguji' => 'Tim Penguji',
             'status' => 'terjadwal',
         ]);
+        $sempro->penguji()->attach($advisorOne->id);
 
         $this->actingAs($prodi)
             ->patch(route('prodi.jadwal.selesai', $sempro))
@@ -336,10 +526,73 @@ class MahasiswaFeaturesTest extends TestCase
 
         $this->actingAs($student)
             ->post(route('tugas-akhir.daftar-sidang.store'))
+            ->assertSessionHasErrors();
+        $this->assertDatabaseMissing('jadwals', [
+            'user_id' => $student->id,
+            'jenis' => 'sidang',
+        ]);
+
+        $this->actingAs($advisorOne)
+            ->post(route('dosen.nilai.store', $sempro), [
+                'nilai_presentasi' => 80,
+                'nilai_naskah' => 80,
+                'nilai_penguasaan' => 80,
+                'hasil' => 'Lulus',
+            ])
+            ->assertRedirect(route('dosen.jadwal'));
+
+        $this->actingAs($student)
+            ->post(route('tugas-akhir.daftar-sidang.store'))
+            ->assertSessionHasErrors();
+
+        $this->actingAs($prodi)
+            ->patch(route('prodi.validasi-nilai.validate', $sempro));
+
+        $this->actingAs($student)
+            ->post(route('tugas-akhir.daftar-sidang.store'))
             ->assertRedirect(route('tugas-akhir.daftar-sidang'));
         $this->assertDatabaseHas('jadwals', [
             'user_id' => $student->id,
             'jenis' => 'sidang',
+            'status' => 'menunggu',
+        ]);
+    }
+
+    public function test_student_can_register_for_sempro_again_after_a_manual_result_of_mengulang(): void
+    {
+        $student = User::factory()->create(['role' => 'mahasiswa']);
+        $advisorOne = User::factory()->create(['role' => 'dosen']);
+        $advisorTwo = User::factory()->create(['role' => 'dosen']);
+        $application = TugasAkhir::create([
+            'user_id' => $student->id,
+            'judul' => 'Analisis Sistem Akademik',
+            'topik' => 'Sistem Informasi',
+            'status' => 'Disetujui',
+            'dosen_pembimbing_1' => $advisorOne->id,
+            'dosen_pembimbing_2' => $advisorTwo->id,
+        ]);
+        Jadwal::create([
+            'user_id' => $student->id,
+            'tugas_akhir_id' => $application->id,
+            'jenis' => 'sempro',
+            'status' => 'selesai',
+            'nilai' => 55,
+            'hasil' => 'Mengulang',
+            'status_validasi_nilai' => 'tervalidasi',
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('tugas-akhir.daftar-sempro'))
+            ->assertOk()
+            ->assertSee('Daftar Ulang Sempro');
+
+        $this->post(route('tugas-akhir.daftar-sempro.store'))
+            ->assertRedirect(route('tugas-akhir.daftar-sempro'));
+
+        $this->assertDatabaseCount('jadwals', 2);
+        $this->assertDatabaseHas('jadwals', [
+            'user_id' => $student->id,
+            'jenis' => 'sempro',
             'status' => 'menunggu',
         ]);
     }

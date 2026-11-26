@@ -1,103 +1,81 @@
-
 @extends('layouts.tu')
 
 @section('title', 'Dashboard TU - SIMTA')
-@section('page-label', 'Dashboard TU')
+@section('page-label', 'Dashboard TU!')
+@section('page-description', 'Ringkasan permintaan dan penerbitan SK')
 
 @section('content')
-
 <div class="space-y-5">
+    @if(session('success'))
+        <div class="rounded-lg bg-green-100 p-4 text-sm text-green-700">{{ session('success') }}</div>
+    @endif
+    @if($errors->any())
+        <div class="rounded-lg bg-red-100 p-4 text-sm text-red-700">
+            @foreach($errors->all() as $error)
+                <p>{{ $error }}</p>
+            @endforeach
+        </div>
+    @endif
 
-    <!-- HEADER -->
-    <div class="bg-white rounded-lg border border-gray-200
-                p-4 flex items-center justify-between gap-3">
-
+    <section class="flex flex-col items-start justify-between gap-4 rounded-lg bg-[#841719] p-5 text-white sm:flex-row sm:items-center">
         <div>
-            <h1 class="font-bold text-lg">Dashboard TU!</h1>
-            <p class="text-xs text-gray-500">
-                Ringkasan permintaan dan penerbitan SK
+            <p class="text-xs text-red-100">Selamat Datang</p>
+            <h1 class="mt-1 text-lg font-bold">Halo, {{ Auth::user()->name }}!</h1>
+            <p class="mt-1 text-xs text-red-100">
+                Kelola administrasi SK dan dokumen tugas akhir mahasiswa.
             </p>
         </div>
-
-        <div class="flex items-center gap-3">
-            <input type="text"
-                   placeholder="Cari..."
-                   class="hidden sm:block bg-gray-100 rounded px-4 py-2
-                          text-xs w-40">
-
-            <div class="w-8 h-8 rounded-full bg-gray-200
-                        flex items-center justify-center text-sm font-bold">
-                T
-            </div>
-        </div>
-    </div>
-
-    <!-- BANNER SELAMAT DATANG -->
-    <div class="bg-blue-700 text-white rounded-lg p-5
-                flex items-center justify-between gap-4">
-
-        <div>
-            <h2 class="font-bold text-lg">Halo, TU!</h2>
-            <p class="text-xs text-blue-100 mt-1">
-                Periksa permintaan SK pembimbing dan SK Tim Penguji
-                dari mahasiswa.
-            </p>
-        </div>
-
-        <a href="{{ route('tu.administrasi-sk') }}"
-           class="bg-white text-blue-700 rounded px-4 py-2
-                  text-xs font-bold whitespace-nowrap hover:bg-blue-50">
+        <a href="{{ route('tu.administrasi-sk', ['status' => 'perlu']) }}"
+           class="inline-flex items-center gap-3 rounded bg-white px-5 py-2 text-sm font-bold text-blue-700 hover:bg-blue-50">
+            <span aria-hidden="true">▤</span>
             Proses SK
         </a>
-    </div>
+    </section>
 
-    <!-- STATISTIK -->
-    <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
-
-        <div class="bg-white rounded-lg border p-4">
-            <p class="text-xs text-gray-500">
-                Permintaan SK Pembimbing
-            </p>
-            <h2 class="text-2xl font-bold mt-2">2</h2>
+    <a href="{{ route('tu.dokumen') }}" class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white p-4 hover:border-[#841719]">
+        <div>
+            <p class="font-semibold">Dokumen Tugas Akhir</p>
+            <p class="mt-1 text-xs text-gray-500">Unggah, perbarui, dan kelola dokumen mahasiswa.</p>
         </div>
+        <span class="rounded-full bg-blue-100 px-3 py-1 text-sm font-bold text-blue-700">{{ $documentCount }} dokumen</span>
+    </a>
 
-        <div class="bg-white rounded-lg border p-4">
-            <p class="text-xs text-gray-500">
-                Permintaan SK Tim Penguji
-            </p>
-            <h2 class="text-2xl font-bold mt-2">2</h2>
+    <section class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="flex items-center gap-3 rounded-lg border border-gray-300 bg-white p-4">
+            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-200 text-lg text-indigo-700" aria-hidden="true">▤</span>
+            <div>
+                <p class="text-2xl font-bold">{{ $statistics['pembimbing_perlu'] }}</p>
+                <p class="text-xs text-gray-500">Permintaan SK pembimbing</p>
+            </div>
         </div>
-
-        <div class="bg-white rounded-lg border p-4">
-            <p class="text-xs text-gray-500">
-                SK Pembimbing Terbit
-            </p>
-            <h2 class="text-2xl font-bold mt-2">2</h2>
+        <div class="flex items-center gap-3 rounded-lg border border-gray-300 bg-white p-4">
+            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-200 text-lg text-amber-700" aria-hidden="true">♟</span>
+            <div>
+                <p class="text-2xl font-bold">{{ $statistics['penguji_perlu'] }}</p>
+                <p class="text-xs text-gray-500">Permintaan SK tim penguji</p>
+            </div>
         </div>
-
-        <div class="bg-white rounded-lg border p-4">
-            <p class="text-xs text-gray-500">
-                SK Tim Penguji Terbit
-            </p>
-            <h2 class="text-2xl font-bold mt-2">2</h2>
+        <div class="flex items-center gap-3 rounded-lg border border-gray-300 bg-white p-4">
+            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-200 text-lg text-green-700" aria-hidden="true">◷</span>
+            <div>
+                <p class="text-2xl font-bold">{{ $statistics['pembimbing_terbit'] }}</p>
+                <p class="text-xs text-gray-500">SK pembimbing terbit</p>
+            </div>
         </div>
+        <div class="flex items-center gap-3 rounded-lg border border-gray-300 bg-white p-4">
+            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-200 text-lg text-red-700" aria-hidden="true">✓</span>
+            <div>
+                <p class="text-2xl font-bold">{{ $statistics['penguji_terbit'] }}</p>
+                <p class="text-xs text-gray-500">SK tim penguji terbit</p>
+            </div>
+        </div>
+    </section>
 
-    </div>
-
-    <!-- TABEL DAN PERLU DIPROSES -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
-
-        <!-- PERMINTAAN SK TERBARU -->
-        <div class="xl:col-span-2 bg-white rounded-lg
-                    border border-gray-200 p-4">
-
-            <h3 class="font-bold text-sm mb-4">
-                Permintaan SK Terbaru
-            </h3>
-
+    <section class="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <div class="overflow-hidden rounded-lg border border-gray-200 bg-white p-4 xl:col-span-2">
+            <h2 class="mb-4 text-sm font-bold">Permintaan SK Terbaru</h2>
             <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left">
-
+                <table class="w-full text-left text-xs">
                     <thead class="bg-gray-50 text-gray-600">
                         <tr>
                             <th class="p-3">No</th>
@@ -107,116 +85,53 @@
                             <th class="p-3">Status</th>
                         </tr>
                     </thead>
-
                     <tbody class="divide-y">
-
-                        <tr>
-                            <td class="p-3">1</td>
-                            <td class="p-3">Difa Febi Ayu</td>
-                            <td class="p-3">SK Pembimbing</td>
-                            <td class="p-3">25 Mei 2026</td>
-                            <td class="p-3">
-                                <span class="bg-yellow-100 text-yellow-700
-                                             px-2 py-1 rounded">
-                                    Perlu Diproses
-                                </span>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td class="p-3">2</td>
-                            <td class="p-3">Eva Fitri</td>
-                            <td class="p-3">SK Pembimbing</td>
-                            <td class="p-3">27 Mei 2026</td>
-                            <td class="p-3">
-                                <span class="bg-green-100 text-green-700
-                                             px-2 py-1 rounded">
-                                    Terbit
-                                </span>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td class="p-3">3</td>
-                            <td class="p-3">Meutis Sandrina</td>
-                            <td class="p-3">SK Pembimbing</td>
-                            <td class="p-3">12 Jan 2026</td>
-                            <td class="p-3">
-                                <span class="bg-yellow-100 text-yellow-700
-                                             px-2 py-1 rounded">
-                                    Perlu Diproses
-                                </span>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td class="p-3">4</td>
-                            <td class="p-3">Zoria Fitriaca</td>
-                            <td class="p-3">SK Tim Penguji</td>
-                            <td class="p-3">28 Mei 2026</td>
-                            <td class="p-3">
-                                <span class="bg-yellow-100 text-yellow-700
-                                             px-2 py-1 rounded">
-                                    Perlu Diproses
-                                </span>
-                            </td>
-                        </tr>
-
+                        @forelse($latestRequests as $request)
+                            <tr>
+                                <td class="p-3">{{ $loop->iteration }}</td>
+                                <td class="p-3 font-semibold">{{ $request['mahasiswa'] }}</td>
+                                <td class="p-3">{{ $request['jenis_label'] }}</td>
+                                <td class="whitespace-nowrap p-3">{{ $request['requested_at']?->locale('id')->translatedFormat('d M Y') ?? '-' }}</td>
+                                <td class="p-3">
+                                    <span class="inline-flex whitespace-nowrap rounded px-2 py-1 font-semibold {{ $request['status'] === 'terbit' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
+                                        {{ $request['status'] === 'terbit' ? 'Terbit' : 'Perlu Diproses' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="p-6 text-center text-gray-500">
+                                    Belum ada permintaan SK dari tugas akhir atau jadwal yang tersedia.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- PERLU DIPROSES -->
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-
-            <h3 class="font-bold text-sm mb-4">
-                Perlu Diproses
-            </h3>
-
+        <div class="rounded-lg border border-gray-300 bg-white p-4">
+            <div class="mb-4 flex items-center justify-between gap-2">
+                <h2 class="text-sm font-bold">Perlu Diproses</h2>
+                <span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700">{{ $statistics['perlu'] }}</span>
+            </div>
             <div class="space-y-3">
-
-                <div class="flex items-center gap-3 border-b pb-3">
-                    <div class="bg-red-100 text-red-600 rounded p-3">
-                        SK
-                    </div>
-                    <div>
-                        <p class="text-xs font-bold">SK Pembimbing</p>
-                        <p class="text-[10px] text-gray-500">
-                            Eva Fitri · 27 Mei 2026
-                        </p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-3 border-b pb-3">
-                    <div class="bg-red-100 text-red-600 rounded p-3">
-                        SK
-                    </div>
-                    <div>
-                        <p class="text-xs font-bold">SK Tim Penguji</p>
-                        <p class="text-[10px] text-gray-500">
-                            Zoria Fitriaca · 28 Mei 2026
-                        </p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-3">
-                    <div class="bg-red-100 text-red-600 rounded p-3">
-                        SK
-                    </div>
-                    <div>
-                        <p class="text-xs font-bold">SK Tim Penguji</p>
-                        <p class="text-[10px] text-gray-500">
-                            Fajar Ramadhan · 29 Mei 2026
-                        </p>
-                    </div>
-                </div>
-
+                @forelse($pendingRequests as $request)
+                    <a href="{{ route('tu.proses-sk', ['jenis' => $request['jenis'], 'id' => $request['id']]) }}"
+                       class="flex items-center gap-3 border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-700" aria-hidden="true">▤</span>
+                        <span class="min-w-0">
+                            <span class="block text-xs font-bold">{{ $request['jenis_label'] }}</span>
+                            <span class="mt-1 block truncate text-[10px] text-gray-500">
+                                {{ $request['mahasiswa'] }} · {{ $request['requested_at']?->locale('id')->translatedFormat('d M Y') ?? '-' }}
+                            </span>
+                        </span>
+                    </a>
+                @empty
+                    <p class="py-3 text-xs text-gray-500">Tidak ada SK yang perlu diproses.</p>
+                @endforelse
             </div>
         </div>
-
-    </div>
-
+    </section>
 </div>
-
 @endsection

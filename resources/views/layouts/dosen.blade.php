@@ -25,6 +25,14 @@
                    class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('dosen.dashboard') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
                     🏠 Dashboard
                 </a>
+                <a href="{{ route('dosen.jadwal') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('dosen.jadwal') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    ▣ Jadwal
+                </a>
+                <a href="{{ route('dosen.keterlibatan') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('dosen.keterlibatan') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    ◉ Rekap Keterlibatan
+                </a>
             </nav>
             <!-- IDENTITAS -->
             <div class="mt-auto pt-6">
@@ -59,9 +67,12 @@
                     </p>
                 </div>
                 <div class="flex items-center gap-4">
-                    <input type="text" placeholder="Cari..."
-                           class="hidden md:block bg-[#4b5420] text-white placeholder-gray-200 rounded px-4 py-2 text-xs w-48">
-                    <span class="text-sm">🔔</span>
+                    <form action="{{ route('dosen.jadwal') }}" method="GET">
+                        <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari mahasiswa atau judul..."
+                               aria-label="Cari jadwal dosen"
+                               class="hidden md:block bg-[#4b5420] text-white placeholder-gray-200 rounded px-4 py-2 text-xs w-52">
+                    </form>
+                    <a href="{{ route('dosen.jadwal') }}" class="text-sm" aria-label="Lihat jadwal">🔔</a>
                     <div class="w-6 h-6 rounded-full bg-[#a34a4b] flex items-center justify-center text-xs">
                         {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                     </div>

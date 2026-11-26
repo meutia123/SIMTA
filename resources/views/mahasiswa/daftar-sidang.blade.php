@@ -11,7 +11,7 @@
     {{-- HEADER --}}
     <div class="flex justify-between items-center flex-wrap gap-3">
         <h2 class="text-2xl font-bold">
-            Daftar Sidang
+            Daftar Sidang/Komprehensif
         </h2>
 
         <div class="flex gap-2 flex-wrap">
@@ -33,6 +33,9 @@
             {{ session('success') }}
         </div>
     @endif
+    <p class="text-xs text-gray-500">
+        Jadwal Sidang/Komprehensif ditetapkan SEK Prodi melalui sistem eksternal dan ditampilkan di SIMTA setelah informasinya tersedia.
+    </p>
     @if($errors->any())
         <div class="bg-red-100 text-red-700 p-4 rounded-lg">
             @foreach($errors->all() as $error)
@@ -48,17 +51,22 @@
         </div>
     @elseif($tugasAkhir->status !== 'Disetujui')
         <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
-            Pendaftaran Sidang tersedia setelah Prodi menyetujui pengajuan judul.
+            Pendaftaran Sidang/Komprehensif tersedia setelah judul disetujui dan dua pembimbing ditetapkan.
         </div>
-    @elseif(!$sempro->contains(fn ($item) => $item->status === 'selesai'))
+    @elseif(!$semproLulus)
         <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
-            Seminar Proposal harus ditandai selesai oleh Prodi sebelum mendaftar Sidang.
+            Sempro terbaru harus selesai dan dinyatakan Lulus oleh Prodi sebelum mendaftar Sidang/Komprehensif.
         </div>
     @elseif(!$adaPendaftaranAktif)
+        @if($sidang->first()?->nilaiTervalidasi() && $sidang->first()?->hasil === 'Mengulang')
+            <div class="mb-3 rounded-lg border border-orange-200 bg-orange-50 p-4 text-sm text-orange-800">
+                Hasil ujian akhir terakhir perlu diulang. Anda dapat mendaftar kembali.
+            </div>
+        @endif
         <form action="{{ route('tugas-akhir.daftar-sidang.store') }}" method="POST">
             @csrf
             <button type="submit" class="rounded-lg bg-[#841719] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#6f1214]">
-                Ajukan Pendaftaran Sidang
+                {{ $sidang->first()?->nilaiTervalidasi() && $sidang->first()?->hasil === 'Mengulang' ? 'Daftar Ulang Sidang/Komprehensif' : 'Ajukan Pendaftaran Sidang/Komprehensif' }}
             </button>
         </form>
     @endif
@@ -91,10 +99,10 @@
             </div>
 
             <div>
-                <div class="w-10 h-10 mx-auto rounded-full {{ $sempro->contains(fn ($item) => $item->status === 'selesai') ? 'bg-green-700 text-white' : 'bg-gray-300 text-black' }} flex items-center justify-center">
+                <div class="w-10 h-10 mx-auto rounded-full {{ $sempro->contains(fn ($item) => $item->status === 'selesai' && $item->nilaiTervalidasi() && $item->hasil === 'Lulus') ? 'bg-green-700 text-white' : 'bg-gray-300 text-black' }} flex items-center justify-center">
                     3
                 </div>
-                <p class="mt-2 text-sm {{ $sempro->contains(fn ($item) => $item->status === 'selesai') ? 'font-semibold text-green-700' : 'text-gray-600' }}">
+                <p class="mt-2 text-sm {{ $sempro->contains(fn ($item) => $item->status === 'selesai' && $item->nilaiTervalidasi() && $item->hasil === 'Lulus') ? 'font-semibold text-green-700' : 'text-gray-600' }}">
                     Seminar Proposal
                 </p>
             </div>
@@ -104,7 +112,7 @@
                     4
                 </div>
                 <p class="mt-2 text-sm {{ $sidang->contains(fn ($item) => in_array($item->status, ['terjadwal', 'selesai'], true)) ? 'font-semibold text-green-700' : 'text-gray-600' }}">
-                    Sidang
+                    Sidang/Komprehensif
                 </p>
             </div>
 
@@ -115,7 +123,7 @@
     <div class="bg-white rounded-xl border p-6">
 
         <h3 class="text-lg font-bold mb-4">
-            Daftar Sidang
+            Riwayat Sidang/Komprehensif
         </h3>
 
         @if($sidang->count() > 0)
@@ -128,6 +136,7 @@
                             <th class="py-3 px-4 text-left font-semibold text-gray-600">Topik</th>
                             <th class="py-3 px-4 text-left font-semibold text-gray-600">Status</th>
                             <th class="py-3 px-4 text-left font-semibold text-gray-600">Jadwal</th>
+                            <th class="py-3 px-4 text-left font-semibold text-gray-600">Hasil</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -145,6 +154,19 @@
                                 </td>
                                 <td class="py-3 px-4 text-gray-500">
                                     {{ $item->waktu?->format('d M Y H:i') ?? 'Menunggu penetapan' }}
+                                </td>
+                                <td class="py-3 px-4">
+                                    @if($item->nilaiTervalidasi())
+                                        <span class="font-semibold {{ $item->hasil === 'Lulus' ? 'text-green-700' : 'text-orange-700' }}">
+                                            {{ $item->hasil }} ({{ rtrim(rtrim(number_format((float) $item->nilai, 2, '.', ''), '0'), '.') }})
+                                        </span>
+                                    @elseif($item->status_validasi_nilai === 'menunggu_validasi')
+                                        <span class="text-amber-700">Menunggu Validasi Prodi</span>
+                                    @elseif($item->status_validasi_nilai === 'dikembalikan')
+                                        <span class="text-orange-700">Nilai sedang diperbaiki dosen</span>
+                                    @else
+                                        <span class="text-gray-500">Belum dicatat</span>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
@@ -220,7 +242,7 @@
                     Status
                 </td>
                 <td>
-                    <span class="rounded px-3 py-1 {{ $tugasAkhir?->status === 'Disetujui' ? 'bg-green-100 text-green-700' : ($tugasAkhir?->status === 'Ditolak' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') }}">
+                    <span class="rounded px-3 py-1 {{ $tugasAkhir?->status === 'Disetujui' ? 'bg-green-100 text-green-700' : ($tugasAkhir?->status === 'Ditolak' ? 'bg-red-100 text-red-700' : ($tugasAkhir?->status === 'Perlu Perbaikan' ? 'bg-orange-100 text-orange-700' : 'bg-yellow-100 text-yellow-700')) }}">
                         {{ $tugasAkhir->status ?? 'Belum Ada' }}
                     </span>
                 </td>

@@ -133,7 +133,7 @@
                     4
                 </div>
                 <p class="mt-2 text-sm {{ $tugasAkhir?->jadwals?->contains(fn ($item) => $item->jenis === 'sidang' && in_array($item->status, ['terjadwal', 'selesai'], true)) ? 'font-semibold text-green-700' : 'text-gray-600' }}">
-                    Sidang
+                    Sidang/Komprehensif
                 </p>
             </div>
 
@@ -190,7 +190,7 @@
                     Status
                 </td>
                 <td>
-                    <span class="rounded px-3 py-1 {{ $tugasAkhir?->status === 'Disetujui' ? 'bg-green-100 text-green-700' : ($tugasAkhir?->status === 'Ditolak' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') }}">
+                    <span class="rounded px-3 py-1 {{ $tugasAkhir?->status === 'Disetujui' ? 'bg-green-100 text-green-700' : ($tugasAkhir?->status === 'Ditolak' ? 'bg-red-100 text-red-700' : ($tugasAkhir?->status === 'Perlu Perbaikan' ? 'bg-orange-100 text-orange-700' : 'bg-yellow-100 text-yellow-700')) }}">
                         {{ $tugasAkhir->status ?? 'Belum Ada' }}
                     </span>
                 </td>

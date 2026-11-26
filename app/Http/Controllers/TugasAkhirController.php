@@ -27,15 +27,23 @@ class TugasAkhirController extends Controller
 
     public function store(Request $request)
     {
+        $existing = TugasAkhir::where('user_id', Auth::id())->latest()->first();
+        if ($existing && $existing->status !== 'Perlu Perbaikan') {
+            return back()->withErrors(
+                'Pengajuan hanya dapat dikirim ulang setelah Prodi meminta perbaikan.'
+            );
+        }
+
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'topik' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'calon_dosen_1' => 'required|exists:users,id',
-            'calon_dosen_2' => 'required|different:calon_dosen_1|exists:users,id',
+            'calon_dosen_2' => 'required|different:calon_dosen_1|different:calon_dosen_3|exists:users,id',
+            'calon_dosen_3' => 'required|different:calon_dosen_1|different:calon_dosen_2|exists:users,id',
         ]);
 
-        foreach (['calon_dosen_1', 'calon_dosen_2'] as $field) {
+        foreach (['calon_dosen_1', 'calon_dosen_2', 'calon_dosen_3'] as $field) {
             $isDosen = User::where('id', $validated[$field])
                 ->where('role', 'dosen')
                 ->exists();
@@ -47,15 +55,30 @@ class TugasAkhirController extends Controller
             }
         }
 
-        TugasAkhir::create([
-            'user_id' => Auth::id(),
+        $data = [
             'judul' => $validated['judul'],
             'topik' => $validated['topik'],
             'deskripsi' => $validated['deskripsi'] ?? null,
             'calon_dosen_1' => $validated['calon_dosen_1'],
             'calon_dosen_2' => $validated['calon_dosen_2'],
-            'calon_dosen_3' => null,
-            'status' => 'Menunggu'
+            'calon_dosen_3' => $validated['calon_dosen_3'],
+            'dosen_pembimbing_1' => null,
+            'dosen_pembimbing_2' => null,
+            'status' => 'Menunggu',
+            'catatan_prodi' => null,
+        ];
+
+        if ($existing) {
+            $existing->update($data);
+
+            return redirect()
+                ->route('tugas-akhir')
+                ->with('success', 'Perbaikan pengajuan berhasil dikirim ulang.');
+        }
+
+        TugasAkhir::create([
+            ...$data,
+            'user_id' => Auth::id(),
         ]);
 
         return redirect()
@@ -86,7 +109,8 @@ class TugasAkhirController extends Controller
             ->with('tugasAkhir')
             ->latest()
             ->get();
-        $adaPendaftaranAktif = $sempro->contains(fn ($item) => in_array($item->status, ['menunggu', 'terjadwal', 'selesai'], true));
+        $latestSempro = $sempro->first();
+        $adaPendaftaranAktif = $latestSempro && $this->examStillActive($latestSempro);
 
         return view('mahasiswa.daftar-sempro', compact('tugasAkhir', 'sempro', 'adaPendaftaranAktif'));
     }
@@ -107,9 +131,14 @@ class TugasAkhirController extends Controller
             ->where('jenis', 'sempro')
             ->latest()
             ->get();
-        $adaPendaftaranAktif = $sidang->contains(fn ($item) => in_array($item->status, ['menunggu', 'terjadwal', 'selesai'], true));
+        $latestSempro = $sempro->first();
+        $latestSidang = $sidang->first();
+        $semproLulus = $latestSempro?->status === 'selesai'
+            && $latestSempro->nilaiTervalidasi()
+            && $latestSempro->hasil === 'Lulus';
+        $adaPendaftaranAktif = $latestSidang && $this->examStillActive($latestSidang);
 
-        return view('mahasiswa.daftar-sidang', compact('tugasAkhir', 'sidang', 'sempro', 'adaPendaftaranAktif'));
+        return view('mahasiswa.daftar-sidang', compact('tugasAkhir', 'sidang', 'sempro', 'semproLulus', 'adaPendaftaranAktif'));
     }
 
     public function jadwal()
@@ -147,24 +176,38 @@ class TugasAkhirController extends Controller
             return redirect()->route($route)->withErrors('Pengajuan judul harus disetujui Prodi terlebih dahulu.');
         }
 
-        if ($jenis === 'sidang') {
-            $semproSelesai = Jadwal::where('user_id', Auth::id())
-                ->where('jenis', 'sempro')
-                ->where('status', 'selesai')
-                ->exists();
+        if (!$tugasAkhir->dosen_pembimbing_1 || !$tugasAkhir->dosen_pembimbing_2) {
+            return redirect()->route($route)->withErrors('Prodi harus menetapkan dua dosen pembimbing terlebih dahulu.');
+        }
 
-            if (!$semproSelesai) {
-                return redirect()->route($route)->withErrors('Seminar Proposal harus ditandai selesai sebelum mendaftar Sidang.');
+        if ($jenis === 'sidang') {
+            $latestSempro = Jadwal::where('user_id', Auth::id())
+                ->where('jenis', 'sempro')
+                ->latest()
+                ->first();
+
+            if (
+                !$latestSempro
+                || $latestSempro->status !== 'selesai'
+                || !$latestSempro->nilaiTervalidasi()
+                || $latestSempro->hasil !== 'Lulus'
+            ) {
+                return redirect()->route($route)->withErrors('Sempro terbaru harus selesai dan nilainya divalidasi Prodi dengan hasil Lulus sebelum mendaftar Sidang/Komprehensif.');
             }
         }
 
-        $sudahTerdaftar = Jadwal::where('user_id', Auth::id())
+        $latestExam = Jadwal::where('user_id', Auth::id())
             ->where('jenis', $jenis)
-            ->whereIn('status', ['menunggu', 'terjadwal', 'selesai'])
-            ->exists();
+            ->latest()
+            ->first();
 
-        if ($sudahTerdaftar) {
-            return redirect()->route($route)->withErrors('Pendaftaran aktif untuk tahap ini sudah ada.');
+        $canRepeat = $latestExam
+            && $latestExam->status === 'selesai'
+            && $latestExam->nilaiTervalidasi()
+            && $latestExam->hasil === 'Mengulang';
+
+        if ($latestExam && $latestExam->status !== 'ditolak' && !$canRepeat) {
+            return redirect()->route($route)->withErrors('Pendaftaran aktif atau hasil Lulus untuk tahap ini sudah tercatat.');
         }
 
         Jadwal::create([
@@ -177,9 +220,19 @@ class TugasAkhirController extends Controller
         return redirect()->route($route)->with('success', 'Pendaftaran berhasil dikirim ke Prodi.');
     }
 
+    private function examStillActive(Jadwal $jadwal): bool
+    {
+        if (in_array($jadwal->status, ['menunggu', 'terjadwal'], true)) {
+            return true;
+        }
+
+        return $jadwal->status === 'selesai'
+            && (!$jadwal->nilaiTervalidasi() || $jadwal->hasil !== 'Mengulang');
+    }
+
     public function dokumen()
     {
-        $tugasAkhir = TugasAkhir::where('user_id', Auth::id())
+        $tugasAkhir = TugasAkhir::with('jadwals')->where('user_id', Auth::id())
             ->latest()
             ->first();
 
@@ -187,6 +240,30 @@ class TugasAkhirController extends Controller
             ->with('tugasAkhir')
             ->latest()
             ->get();
+        $suratKeputusan = collect();
+
+        if ($tugasAkhir?->sk_pembimbing_file) {
+            $suratKeputusan->push([
+                'nama' => 'SK Pembimbing',
+                'jenis' => 'pembimbing',
+                'id' => $tugasAkhir->id,
+                'nomor' => $tugasAkhir->sk_pembimbing_nomor,
+                'tanggal' => $tugasAkhir->sk_pembimbing_tanggal,
+            ]);
+        }
+
+        foreach ($tugasAkhir?->jadwals ?? [] as $jadwal) {
+            if ($jadwal->sk_tim_penguji_file) {
+                $suratKeputusan->push([
+                    'nama' => 'SK Tim Penguji',
+                    'jenis' => 'penguji',
+                    'id' => $jadwal->id,
+                    'nomor' => $jadwal->sk_tim_penguji_nomor,
+                    'tanggal' => $jadwal->sk_tim_penguji_tanggal,
+                    'tahap' => ucfirst($jadwal->jenis),
+                ]);
+            }
+        }
 
         $dokumenWajib = [
             ['nama' => 'SK Pembimbing', 'jenis' => 'Surat Keputusan', 'wajib' => true],
@@ -196,7 +273,7 @@ class TugasAkhirController extends Controller
             ['nama' => 'Lembar Persetujuan', 'jenis' => 'Lembar Persetujuan', 'wajib' => true],
         ];
 
-        return view('mahasiswa.pages.dokumen', compact('tugasAkhir', 'documents', 'dokumenWajib'));
+        return view('mahasiswa.pages.dokumen', compact('tugasAkhir', 'documents', 'dokumenWajib', 'suratKeputusan'));
     }
 
     public function uploadDokumen(Request $request)
@@ -207,6 +284,16 @@ class TugasAkhirController extends Controller
             'jenis_dokumen' => 'required|string|max:255',
             'file' => 'required|file|mimes:pdf,doc,docx|max:10240',
         ]);
+
+        $namaDokumen = $validated['nama_dokumen'] === 'Lainnya'
+            ? $validated['nama_dokumen_lain']
+            : $validated['nama_dokumen'];
+
+        if (in_array($namaDokumen, ['SK Pembimbing', 'SK Tim Penguji'], true)) {
+            return back()->withErrors([
+                'nama_dokumen' => 'Surat Keputusan diterbitkan oleh TU dan dapat diunduh setelah tersedia.',
+            ])->withInput();
+        }
 
         $tugasAkhir = TugasAkhir::where('user_id', Auth::id())->latest()->first();
 
@@ -221,10 +308,9 @@ class TugasAkhirController extends Controller
 
         Document::create([
             'user_id' => Auth::id(),
+            'uploaded_by' => Auth::id(),
             'tugas_akhir_id' => $tugasAkhir?->id,
-            'nama_dokumen' => $validated['nama_dokumen'] === 'Lainnya'
-                ? $validated['nama_dokumen_lain']
-                : $validated['nama_dokumen'],
+            'nama_dokumen' => $namaDokumen,
             'jenis_dokumen' => $validated['jenis_dokumen'],
             'file_path' => $filePath,
             'file_name' => $originalFileName,
@@ -240,7 +326,11 @@ class TugasAkhirController extends Controller
 
     public function hapusDokumen(Document $document)
     {
-        if ($document->user_id !== Auth::id()) {
+        if ((int) $document->user_id !== (int) Auth::id()) {
+            abort(403);
+        }
+
+        if ($document->uploaded_by && (int) $document->uploaded_by !== (int) Auth::id()) {
             abort(403);
         }
 
@@ -257,7 +347,7 @@ class TugasAkhirController extends Controller
 
     public function downloadDokumen(Document $document)
     {
-        if ($document->user_id !== Auth::id()) {
+        if ((int) $document->user_id !== (int) Auth::id()) {
             abort(403);
         }
 

@@ -20,6 +20,15 @@ class TugasAkhir extends Model
         'dosen_pembimbing_2',
         'status',
         'catatan_prodi',
+        'sk_pembimbing_nomor',
+        'sk_pembimbing_tanggal',
+        'sk_pembimbing_file',
+        'sk_pembimbing_diminta_at',
+    ];
+
+    protected $casts = [
+        'sk_pembimbing_tanggal' => 'date',
+        'sk_pembimbing_diminta_at' => 'datetime',
     ];
 
     public function mahasiswa(): BelongsTo
@@ -35,6 +44,11 @@ class TugasAkhir extends Model
     public function calonDosen2(): BelongsTo
     {
         return $this->belongsTo(User::class, 'calon_dosen_2');
+    }
+
+    public function calonDosen3(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'calon_dosen_3');
     }
 
     public function dosenPembimbing1(): BelongsTo

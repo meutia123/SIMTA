@@ -1,156 +1,120 @@
-
 @extends('layouts.tu')
 
 @section('title', 'Administrasi SK - SIMTA')
 @section('page-label', 'Administrasi SK')
+@section('page-description', 'Permintaan dan penerbitan SK')
 
 @section('content')
-
 <div class="space-y-5">
-
-    <!-- HEADER -->
-    <div class="flex justify-between items-center">
-        <div>
-            <h1 class="text-xl font-bold">Administrasi SK</h1>
-            <p class="text-xs text-gray-500 mt-1">
-                Kelola permintaan dan penerbitan Surat Keputusan.
-            </p>
+    @if(session('success'))
+        <div class="rounded-lg bg-green-100 p-4 text-sm text-green-700">{{ session('success') }}</div>
+    @endif
+    @if($errors->any())
+        <div class="rounded-lg bg-red-100 p-4 text-sm text-red-700">
+            @foreach($errors->all() as $error)
+                <p>{{ $error }}</p>
+            @endforeach
         </div>
+    @endif
 
-        <input type="text"
-               placeholder="Cari mahasiswa..."
-               class="bg-white border rounded-lg px-3 py-2 text-xs w-40">
-    </div>
-
-    <!-- RINGKASAN -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-
-        <div class="bg-white rounded-lg border p-4">
-            <p class="text-xs text-gray-500">Total Permintaan SK</p>
-            <h2 class="text-2xl font-bold mt-2">8</h2>
-        </div>
-
-        <div class="bg-white rounded-lg border p-4">
-            <p class="text-xs text-gray-500">Perlu Diproses</p>
-            <h2 class="text-2xl font-bold text-yellow-600 mt-2">3</h2>
-        </div>
-
-        <div class="bg-white rounded-lg border p-4">
-            <p class="text-xs text-gray-500">SK Telah Terbit</p>
-            <h2 class="text-2xl font-bold text-green-600 mt-2">5</h2>
-        </div>
-
-    </div>
-
-    <!-- FILTER -->
-    <div class="bg-white border rounded-lg p-4">
-        <div class="flex flex-wrap items-center gap-3">
-
-            <label class="text-xs font-semibold">
-                Jenis SK:
-            </label>
-
-            <select id="filterJenis"
-                    class="border rounded-lg px-3 py-2 text-xs">
-                <option value="semua">Semua Jenis SK</option>
-                <option value="pembimbing">SK Pembimbing</option>
-                <option value="penguji">SK Tim Penguji</option>
+    <section class="flex flex-wrap items-center gap-3">
+        <label for="filterJenis" class="text-sm font-semibold">Jenis SK</label>
+        <form action="{{ route('tu.administrasi-sk') }}" method="GET" class="flex flex-wrap items-center gap-2">
+            <select id="filterJenis" name="jenis" class="min-w-40 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm">
+                <option value="semua" @selected($filters['jenis'] === 'semua')>Semua</option>
+                <option value="pembimbing" @selected($filters['jenis'] === 'pembimbing')>SK Pembimbing</option>
+                <option value="penguji" @selected($filters['jenis'] === 'penguji')>SK Tim Penguji</option>
             </select>
+            @if($filters['status'] !== 'semua')
+                <input type="hidden" name="status" value="{{ $filters['status'] }}">
+            @endif
+            @if($filters['q'])
+                <input type="hidden" name="q" value="{{ $filters['q'] }}">
+            @endif
+            <button type="submit" class="rounded-lg bg-[#841719] px-4 py-2 text-sm font-semibold text-white hover:bg-[#6f1214]">
+                Tampilkan
+            </button>
+        </form>
+    </section>
 
-            <select id="filterStatus"
-                    class="border rounded-lg px-3 py-2 text-xs">
-                <option value="semua">Semua Status</option>
-                <option value="perlu">Perlu Diproses</option>
-                <option value="terbit">Terbit</option>
-            </select>
+    <section class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <a href="{{ route('tu.administrasi-sk', ['status' => 'perlu', 'jenis' => $filters['jenis'], 'q' => $filters['q']]) }}"
+           class="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 hover:border-amber-300">
+            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 text-lg text-red-700" aria-hidden="true">▤</span>
+            <span>
+                <span class="block text-2xl font-bold">{{ $statistics['perlu'] }}</span>
+                <span class="block text-xs text-gray-500">Perlu Diproses</span>
+            </span>
+        </a>
+        <a href="{{ route('tu.administrasi-sk', ['status' => 'terbit', 'jenis' => $filters['jenis'], 'q' => $filters['q']]) }}"
+           class="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 hover:border-green-300">
+            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 text-lg text-green-700" aria-hidden="true">◷</span>
+            <span>
+                <span class="block text-2xl font-bold">{{ $statistics['terbit'] }}</span>
+                <span class="block text-xs text-gray-500">Sudah Terbit</span>
+            </span>
+        </a>
+    </section>
 
-        </div>
-    </div>
-
-    <!-- TABEL -->
-    <div class="bg-white border rounded-lg p-4">
-
-        <h2 class="font-bold text-sm mb-4">
-            Daftar Administrasi SK
-        </h2>
-
+    <section class="overflow-hidden rounded-lg border border-gray-200 bg-white p-4">
+        <h2 class="mb-4 text-sm font-bold">Daftar Administrasi SK</h2>
         <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left">
-
+            <table class="w-full text-left text-xs">
                 <thead class="bg-gray-50 text-gray-600">
                     <tr>
                         <th class="p-3">No</th>
                         <th class="p-3">Mahasiswa</th>
                         <th class="p-3">Jenis SK</th>
-                        <th class="p-3">Tanggal Diminta</th>
+                        <th class="whitespace-nowrap p-3">Diminta</th>
                         <th class="p-3">Nomor SK</th>
                         <th class="p-3">Status</th>
                         <th class="p-3">Aksi</th>
                     </tr>
                 </thead>
-
-                <tbody id="tabelSK" class="divide-y">
-
-                    <tr data-jenis="pembimbing" data-status="perlu">
-                        <td class="p-3">1</td>
-                        <td class="p-3">Difa Febi Ayu</td>
-                        <td class="p-3">SK Pembimbing</td>
-                        <td class="p-3">25 Mei 2026</td>
-                        <td class="p-3">-</td>
-                        <td class="p-3">
-                            <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
-                                Perlu Diproses
-                            </span>
-                        </td>
-                        <td class="p-3">
-                            <button class="text-blue-600 font-semibold">
-                                Proses
-                            </button>
-                        </td>
-                    </tr>
-
-                    <tr data-jenis="pembimbing" data-status="terbit">
-                        <td class="p-3">2</td>
-                        <td class="p-3">Eva Fitri</td>
-                        <td class="p-3">SK Pembimbing</td>
-                        <td class="p-3">27 Mei 2026</td>
-                        <td class="p-3">SK/012/2026</td>
-                        <td class="p-3">
-                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded">
-                                Terbit
-                            </span>
-                        </td>
-                        <td class="p-3">
-                            <button class="text-blue-600 font-semibold">
-                                Unduh
-                            </button>
-                        </td>
-                    </tr>
-
-                    <tr data-jenis="penguji" data-status="perlu">
-                        <td class="p-3">3</td>
-                        <td class="p-3">Zoria Fitriaca</td>
-                        <td class="p-3">SK Tim Penguji</td>
-                        <td class="p-3">28 Mei 2026</td>
-                        <td class="p-3">-</td>
-                        <td class="p-3">
-                            <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
-                                Perlu Diproses
-                            </span>
-                        </td>
-                        <td class="p-3">
-                            <button class="text-blue-600 font-semibold">
-                                Proses
-                            </button>
-                        </td>
-                    </tr>
-
+                <tbody class="divide-y">
+                    @forelse($requests as $request)
+                        <tr>
+                            <td class="p-3">{{ $loop->iteration }}</td>
+                            <td class="p-3 font-semibold">{{ $request['mahasiswa'] }}</td>
+                            <td class="p-3">{{ $request['jenis_label'] }}</td>
+                            <td class="whitespace-nowrap p-3">{{ $request['requested_at']?->locale('id')->translatedFormat('d M Y') ?? '-' }}</td>
+                            <td class="whitespace-nowrap p-3">{{ $request['nomor_sk'] ?: '-' }}</td>
+                            <td class="p-3">
+                                <span class="inline-flex whitespace-nowrap rounded px-2 py-1 font-semibold {{ $request['status'] === 'terbit' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
+                                    {{ $request['status'] === 'terbit' ? 'Terbit' : 'Perlu Diproses' }}
+                                </span>
+                            </td>
+                            <td class="whitespace-nowrap p-3">
+                                @if($request['status'] === 'terbit')
+                                    <a href="{{ route('surat-keputusan.download', ['jenis' => $request['jenis'], 'id' => $request['id']]) }}"
+                                       class="rounded bg-white px-3 py-1.5 font-semibold text-gray-800 ring-1 ring-gray-300 hover:bg-gray-50">
+                                        Unduh
+                                    </a>
+                                @else
+                                    <a href="{{ route('tu.proses-sk', ['jenis' => $request['jenis'], 'id' => $request['id']]) }}"
+                                       class="rounded bg-blue-600 px-3 py-1.5 font-semibold text-white hover:bg-blue-700">
+                                        Proses SK
+                                    </a>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="p-8 text-center text-gray-500">
+                                Tidak ada permintaan SK yang cocok dengan filter.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
+    </section>
 
-    </div>
-
+    @if($filters['status'] !== 'semua')
+        <a href="{{ route('tu.administrasi-sk', ['jenis' => $filters['jenis'], 'q' => $filters['q']]) }}"
+           class="inline-block text-sm font-semibold text-[#841719] hover:underline">
+            Hapus filter status
+        </a>
+    @endif
 </div>
-
 @endsection

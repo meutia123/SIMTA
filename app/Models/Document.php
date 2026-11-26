@@ -9,6 +9,7 @@ class Document extends Model
 {
     protected $fillable = [
         'user_id',
+        'uploaded_by',
         'tugas_akhir_id',
         'nama_dokumen',
         'jenis_dokumen',

@@ -25,17 +25,34 @@
                    class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('tu.dashboard') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
                     🏠 Dashboard
                 </a>
+                <a href="{{ route('tu.administrasi-sk') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('tu.administrasi-sk', 'tu.proses-sk*') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    ▤ Administrasi SK
+                </a>
+                <a href="{{ route('tu.dokumen') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('tu.dokumen*') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    ▧ Dokumen Tugas Akhir
+                </a>
+                <a href="{{ route('tu.profil') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('tu.profil*') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    ♟ Profil
+                </a>
             </nav>
             <!-- IDENTITAS -->
             <div class="mt-auto pt-6">
                 <div class="flex items-center gap-2 border border-[#737c3c] rounded-lg p-2">
-                    <div class="w-7 h-7 rounded-full bg-[#841719] flex items-center justify-center font-bold text-xs">
-                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                    </div>
+                    <a href="{{ route('tu.profil') }}" class="w-7 h-7 shrink-0 rounded-full bg-[#841719] flex items-center justify-center font-bold text-xs overflow-hidden">
+                        @if(Auth::user()->foto_path)
+                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url(Auth::user()->foto_path) }}"
+                                 alt="" class="h-full w-full object-cover">
+                        @else
+                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                        @endif
+                    </a>
                     <div class="min-w-0 flex-1">
                         <p class="text-[9px] font-bold">TU</p>
                         <p class="text-[8px] text-gray-200 truncate">
-                            Sistem Informasi
+                            {{ Auth::user()->program_studi ?: 'Tata Usaha' }}
                         </p>
                     </div>
                     <form action="{{ route('logout') }}" method="POST">
@@ -49,22 +66,34 @@
         </aside>
         <!-- KONTEN -->
         <div class="flex-1 min-w-0 flex flex-col bg-[#f7f7f4]">
-            <header class="bg-[#841719] text-white px-5 py-4 flex items-center justify-between gap-3">
+            @php($isDashboard = request()->routeIs('tu.dashboard'))
+            <header class="{{ $isDashboard ? 'bg-white text-gray-900 border border-gray-200' : 'bg-[#841719] text-white' }} px-5 py-4 flex items-center justify-between gap-3">
                 <div>
                     <h2 class="font-bold text-sm">
                         @yield('page-label', 'Dashboard TU')
                     </h2>
-                    <p class="text-[9px] text-gray-200">
-                        Sistem Informasi Tugas Akhir
+                    <p class="text-[9px] {{ $isDashboard ? 'text-gray-500' : 'text-gray-200' }}">
+                        @yield('page-description', 'Sistem Informasi Tugas Akhir')
                     </p>
                 </div>
                 <div class="flex items-center gap-4">
-                    <input type="text" placeholder="Cari..."
-                           class="hidden md:block bg-[#4b5420] text-white placeholder-gray-200 rounded px-4 py-2 text-xs w-48">
-                    <span class="text-sm">🔔</span>
-                    <div class="w-6 h-6 rounded-full bg-[#a34a4b] flex items-center justify-center text-xs">
-                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                    </div>
+                    <form action="{{ request()->routeIs('tu.dokumen*') ? route('tu.dokumen') : route('tu.administrasi-sk') }}" method="GET" role="search">
+                        <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari..."
+                               aria-label="Cari mahasiswa atau SK"
+                               class="hidden md:block bg-[#4b5420] text-white placeholder-gray-200 rounded px-4 py-2 text-xs w-48">
+                    </form>
+                    <a href="{{ route('tu.administrasi-sk', ['status' => 'perlu']) }}"
+                       class="text-sm" aria-label="Lihat SK yang perlu diproses">🔔</a>
+                    <a href="{{ route('tu.profil') }}"
+                       class="w-6 h-6 rounded-full bg-[#a34a4b] flex items-center justify-center text-xs text-white overflow-hidden"
+                       aria-label="Profil {{ Auth::user()->name }}">
+                        @if(Auth::user()->foto_path)
+                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url(Auth::user()->foto_path) }}"
+                                 alt="" class="h-full w-full object-cover">
+                        @else
+                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                        @endif
+                    </a>
                 </div>
             </header>
             <main class="flex-1 min-w-0 p-5">
@@ -73,5 +102,6 @@
         </div>
     </div>
 </div>
+    @stack('scripts')
 </body>
 </html>

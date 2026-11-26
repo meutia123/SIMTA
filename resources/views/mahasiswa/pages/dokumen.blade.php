@@ -73,13 +73,18 @@
                     @foreach($dokumenWajib as $dw)
                         @php
                             $doc = $documents->where('nama_dokumen', $dw['nama'])->first();
+                            $issuedSk = $suratKeputusan->where('nama', $dw['nama']);
                         @endphp
                         <tr>
                             <td class="px-5 py-4">{{ $no++ }}</td>
                             <td class="px-5 py-4 font-medium">{{ $dw['nama'] }}</td>
                             <td class="px-5 py-4">{{ $dw['jenis'] }}</td>
                             <td class="px-5 py-4">
-                                @if($doc)
+                                @if($issuedSk->isNotEmpty())
+                                    <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                                        Terbit
+                                    </span>
+                                @elseif($doc)
                                     <span class="px-3 py-1 rounded-full text-xs font-medium
                                         @if($doc->status === 'diverifikasi')
                                             bg-green-100 text-green-700
@@ -97,28 +102,41 @@
                                 @endif
                             </td>
                             <td class="px-5 py-4">
-                                @if($doc)
+                                @if($doc && $issuedSk->isEmpty())
                                     {{ number_format($doc->file_size / 1024, 1) }} KB
                                 @else
                                     -
                                 @endif
                             </td>
                             <td class="px-5 py-4 text-center">
-                                @if($doc)
+                                @if($issuedSk->isNotEmpty())
+                                    <div class="flex flex-col items-center gap-1">
+                                        @foreach($issuedSk as $issued)
+                                            <a href="{{ route('surat-keputusan.download', ['jenis' => $issued['jenis'], 'id' => $issued['id']]) }}"
+                                               class="text-[#841719] font-semibold hover:underline text-sm">
+                                                Unduh{{ isset($issued['tahap']) ? ' ' . $issued['tahap'] : '' }}
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                @elseif($doc)
                                     <div class="flex items-center justify-center gap-2">
                                         <a href="{{ route('dokumen.download', $doc->id) }}"
                                            class="text-[#841719] font-semibold hover:underline text-sm">
                                             Unduh
                                         </a>
-                                        <form action="{{ route('dokumen.hapus', $doc->id) }}" method="POST" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                onclick="return confirm('Yakin ingin menghapus dokumen ini?')"
-                                                class="text-red-600 font-semibold hover:underline text-sm">
-                                                Hapus
-                                            </button>
-                                        </form>
+                                        @if(!$doc->uploaded_by || (int) $doc->uploaded_by === (int) Auth::id())
+                                            <form action="{{ route('dokumen.hapus', $doc->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    onclick="return confirm('Yakin ingin menghapus dokumen ini?')"
+                                                    class="text-red-600 font-semibold hover:underline text-sm">
+                                                    Hapus
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="text-xs text-gray-500">Dikelola TU</span>
+                                        @endif
                                     </div>
                                 @else
                                     <span class="text-gray-400 text-sm">-</span>
@@ -181,15 +199,19 @@
                                            class="text-[#841719] font-semibold hover:underline text-sm">
                                             Unduh
                                         </a>
-                                        <form action="{{ route('dokumen.hapus', $doc->id) }}" method="POST" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                onclick="return confirm('Yakin ingin menghapus dokumen ini?')"
-                                                class="text-red-600 font-semibold hover:underline text-sm">
-                                                Hapus
-                                            </button>
-                                        </form>
+                                        @if(!$doc->uploaded_by || (int) $doc->uploaded_by === (int) Auth::id())
+                                            <form action="{{ route('dokumen.hapus', $doc->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    onclick="return confirm('Yakin ingin menghapus dokumen ini?')"
+                                                    class="text-red-600 font-semibold hover:underline text-sm">
+                                                    Hapus
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="text-xs text-gray-500">Dikelola TU</span>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -235,13 +257,15 @@
                         @foreach($dokumenWajib as $dw)
                             @php
                                 $sudahAda = $documents->where('nama_dokumen', $dw['nama'])->first();
+                                $diterbitkanTu = in_array($dw['nama'], ['SK Pembimbing', 'SK Tim Penguji'], true);
                             @endphp
-                            @if(!$sudahAda)
+                            @if(!$sudahAda && !$diterbitkanTu)
                                 <option value="{{ $dw['nama'] }}">{{ $dw['nama'] }} (Wajib)</option>
                             @endif
                         @endforeach
                         <option value="Lainnya">Lainnya (Tambahan)</option>
                     </select>
+                    <p class="mt-2 text-xs text-gray-500">SK Pembimbing dan SK Tim Penguji diterbitkan TU dan dapat diunduh setelah tersedia.</p>
                 </div>
 
                 <div id="divNamaDokumenLain" class="hidden">

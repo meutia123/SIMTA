@@ -10,7 +10,7 @@
 <div class="min-h-screen p-4 md:p-6">
     <div class="flex min-h-[calc(100vh-48px)]">
         <!-- SIDEBAR -->
-        <aside class="w-40 md:w-[165px] bg-[#4b5420] text-white flex flex-col shrink-0 p-4">
+        <aside class="w-52 md:w-60 bg-[#4b5420] text-white flex flex-col shrink-0 overflow-y-auto p-4">
             <div class="flex items-center gap-2 mb-10 mt-1">
                 <div class="bg-[#841719] border border-white rounded w-9 h-8 flex items-center justify-center">
                     🎓
@@ -20,18 +20,42 @@
                     <p class="text-[7px] text-gray-200">Sistem Informasi Tugas Akhir</p>
                 </div>
             </div>
-            <nav class="space-y-3 text-[10px] font-semibold">
+            <nav class="space-y-2 text-xs font-semibold">
                 <a href="{{ route('prodi.dashboard') }}"
                    class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.dashboard') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
                     🏠 Dashboard
                 </a>
-                <a href="{{ route('prodi.jadwal') }}"
-                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.jadwal*') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
-                    ▣ Jadwal
-                </a>
                 <a href="{{ route('prodi.pengajuan-tugas-akhir') }}"
                    class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.pengajuan-tugas-akhir*') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
-                    📄 Pengajuan TA
+                    📄 Pengajuan Judul
+                </a>
+                <a href="{{ route('prodi.sempro') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.sempro') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    ▣ Kelola Sempro
+                </a>
+                <a href="{{ route('prodi.sidang') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.sidang') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    ▣ Sidang/Komprehensif
+                </a>
+                <a href="{{ route('prodi.validasi-nilai') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.validasi-nilai*') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    ◉ Validasi Nilai
+                </a>
+                <a href="{{ route('prodi.progres-mahasiswa') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.progres-mahasiswa') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    ◴ Progres Mahasiswa
+                </a>
+                <a href="{{ route('prodi.rekap-dosen') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.rekap-dosen') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    ◉ Rekap Keterlibatan
+                </a>
+                <a href="{{ route('prodi.laporan') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.laporan*') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    ▤ Laporan
+                </a>
+                <a href="{{ route('prodi.jadwal') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.jadwal*') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    ▣ Jadwal Bimbingan
                 </a>
                 <a href="{{ route('prodi.pengumuman') }}"
                    class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.pengumuman*') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
@@ -67,13 +91,19 @@
                         @yield('page-label', 'Dashboard Prodi')
                     </h2>
                     <p class="text-[9px] text-gray-200">
-                        Sistem Informasi Tugas Akhir
+                        @yield('page-description', 'Sistem Informasi Tugas Akhir')
                     </p>
                 </div>
                 <div class="flex items-center gap-4">
-                    <input type="text" placeholder="Cari..."
-                           class="hidden md:block bg-[#4b5420] text-white placeholder-gray-200 rounded px-4 py-2 text-xs w-48">
-                    <span class="text-sm">🔔</span>
+                    <form action="{{ route('prodi.pengajuan-tugas-akhir') }}" method="GET" class="hidden md:block">
+                        <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari mahasiswa atau judul..."
+                               aria-label="Cari pengajuan tugas akhir"
+                               class="bg-[#4b5420] text-white placeholder-gray-200 rounded px-4 py-2 text-xs w-56">
+                    </form>
+                    <a href="{{ route('prodi.pengajuan-tugas-akhir', ['status' => 'Menunggu']) }}"
+                       title="Pengajuan menunggu" aria-label="Pengajuan menunggu" class="relative text-sm">
+                        🔔
+                    </a>
                     <div class="w-6 h-6 rounded-full bg-[#a34a4b] flex items-center justify-center text-xs">
                         {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                     </div>

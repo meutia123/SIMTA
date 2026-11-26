@@ -33,6 +33,7 @@
         </div>
     @endif
 
+    @if(!$tugasAkhir || $tugasAkhir->status === 'Perlu Perbaikan')
     <form action="{{ route('tugas-akhir.store') }}" method="POST">
         @csrf
 
@@ -50,7 +51,7 @@
                         Judul Tugas Akhir <span class="text-red-600">*</span>
                     </label>
                     <input type="text" name="judul"
-                        value="{{ old('judul') }}"
+                        value="{{ old('judul', $tugasAkhir?->judul) }}"
                         maxlength="255" required
                         placeholder="Masukkan judul tugas akhir"
                         class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#841719] focus:outline-none">
@@ -61,7 +62,7 @@
                         Topik Penelitian <span class="text-red-600">*</span>
                     </label>
                     <input type="text" name="topik"
-                        value="{{ old('topik') }}"
+                        value="{{ old('topik', $tugasAkhir?->topik) }}"
                         maxlength="255" required
                         placeholder="Contoh: Sistem Informasi, Data Mining"
                         class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#841719] focus:outline-none">
@@ -73,7 +74,7 @@
                     </label>
                     <textarea name="deskripsi" rows="5"
                         placeholder="Jelaskan gambaran umum penelitian Anda..."
-                        class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#841719] focus:outline-none">{{ old('deskripsi') }}</textarea>
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#841719] focus:outline-none">{{ old('deskripsi', $tugasAkhir?->deskripsi) }}</textarea>
                 </div>
 
                 <div class="border-t pt-5">
@@ -81,10 +82,10 @@
                         Pilihan Dosen Pembimbing
                     </h3>
                     <p class="text-xs text-gray-500 mb-4">
-                        Pilih dua calon dosen pembimbing sesuai preferensi Anda.
+                        Pilih tiga calon dosen pembimbing sesuai preferensi Anda. Prodi akan menetapkan dua dosen.
                     </p>
 
-                    @for($i = 1; $i <= 2; $i++)
+                    @for($i = 1; $i <= 3; $i++)
                         <div class="mb-4">
                             <label class="block text-sm font-semibold mb-2">
                                 Pembimbing {{ $i }} <span class="text-red-600">*</span>
@@ -96,7 +97,7 @@
 
                                 @foreach($dosen as $item)
                                     <option value="{{ $item->id }}"
-                                        {{ old('calon_dosen_'.$i) == $item->id ? 'selected' : '' }}>
+                                        {{ old('calon_dosen_'.$i, $tugasAkhir?->{'calon_dosen_'.$i}) == $item->id ? 'selected' : '' }}>
                                         {{ $item->name }}
                                     </option>
                                 @endforeach
@@ -113,7 +114,7 @@
 
                     <button type="submit"
                         class="bg-[#841719] hover:bg-[#681315] text-white px-6 py-2.5 rounded-lg text-sm font-semibold">
-                        Kirim Pengajuan
+                        {{ $tugasAkhir?->status === 'Perlu Perbaikan' ? 'Kirim Ulang Perbaikan' : 'Kirim Pengajuan' }}
                     </button>
                 </div>
 
@@ -140,10 +141,16 @@
 
                         <div>
                             <p class="text-gray-500 text-xs">Status Pengajuan</p>
-                            <span class="inline-block mt-1 bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-semibold">
+                            <span class="inline-block mt-1 px-3 py-1 rounded-full text-xs font-semibold {{ $tugasAkhir?->status === 'Disetujui' ? 'bg-green-100 text-green-700' : ($tugasAkhir?->status === 'Perlu Perbaikan' ? 'bg-orange-100 text-orange-700' : 'bg-yellow-100 text-yellow-700') }}">
                                 {{ $tugasAkhir->status ?? 'Belum Mengajukan' }}
                             </span>
                         </div>
+                        @if($tugasAkhir?->catatan_prodi)
+                            <div>
+                                <p class="text-gray-500 text-xs">Catatan Prodi</p>
+                                <p class="mt-1 whitespace-pre-line text-sm">{{ $tugasAkhir->catatan_prodi }}</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -156,7 +163,7 @@
                         <li>Gunakan judul yang jelas dan sesuai bidang penelitian.</li>
                         <li>Isi topik penelitian dengan tepat.</li>
                         <li>Tuliskan deskripsi singkat penelitian.</li>
-                        <li>Pilih dua calon dosen pembimbing yang berbeda.</li>
+                        <li>Pilih tiga calon dosen pembimbing yang berbeda.</li>
                         <li>Periksa kembali data sebelum mengirim pengajuan.</li>
                     </ul>
                 </div>
@@ -164,6 +171,19 @@
             </div>
         </div>
     </form>
+    @else
+        <div class="rounded-xl border border-gray-200 bg-white p-6">
+            <h3 class="font-bold text-gray-800">Pengajuan sedang diproses</h3>
+            <p class="mt-2 text-sm text-gray-600">
+                Status pengajuan Anda: <span class="font-semibold">{{ $tugasAkhir->status }}</span>.
+                Formulir dapat dikirim kembali setelah Prodi meminta perbaikan.
+            </p>
+            @if($tugasAkhir->catatan_prodi)
+                <p class="mt-3 whitespace-pre-line rounded-lg bg-orange-50 p-3 text-sm text-orange-800">{{ $tugasAkhir->catatan_prodi }}</p>
+            @endif
+            <a href="{{ route('tugas-akhir') }}" class="mt-4 inline-block text-sm font-semibold text-[#841719] hover:underline">Lihat status tugas akhir</a>
+        </div>
+    @endif
 
 </div>
 
