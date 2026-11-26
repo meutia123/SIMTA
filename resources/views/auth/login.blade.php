@@ -4,123 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - SIMTA</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
-<body class="bg-white min-h-screen flex items-center justify-center p-4">
 
-    <div class="w-full max-w-md bg-[#F4F3FA] rounded-2xl p-8 shadow-sm">
+<body class="min-h-screen bg-gray-100">
+    <main class="flex min-h-screen items-center justify-center p-4">
+        <form method="POST"
+              action="{{ route('login.process') }}"
+              class="w-full max-w-md rounded-lg bg-white p-6 shadow">
 
-        <div class="flex justify-center mb-4">
-            <i class="fa-solid fa-graduation-cap text-5xl text-black"></i>
-        </div>
-
-        <h1 class="text-center text-3xl font-bold text-black">SIMTA</h1>
-
-        <p class="text-center text-sm font-semibold text-black mt-2 mb-8">
-            Sistem Informasi Manajemen Tugas Akhir
-        </p>
-
-        @if(session('success'))
-            <div class="bg-green-100 text-green-700 text-sm px-4 py-2 rounded-lg mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <form action="{{ route('login') }}" method="POST" class="space-y-5">
             @csrf
 
-            <div>
-                <label for="login" class="block text-sm font-semibold text-black mb-2">
-                    Email atau Nim
+            <h1 class="mb-6 text-2xl font-bold text-center">Login SIMTA</h1>
+
+            @if ($errors->has('login'))
+                <div class="mb-4 rounded bg-red-100 p-3 text-sm text-red-700">
+                    {{ $errors->first('login') }}
+                </div>
+            @endif
+
+            <div class="mb-4">
+                <label for="login" class="mb-1 block text-sm font-medium">
+                    Email atau NIM
                 </label>
 
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">
-                        <i class="fa-regular fa-envelope"></i>
-                    </span>
-
-                    <input
-                        type="text"
-                        id="login"
-                        name="login"
-                        value="{{ old('login') }}"
-                        placeholder="Masukkan Email atau Nim"
-                        class="w-full pl-11 pr-4 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                        required>
-                </div>
-
-                @error('login')
-                    <p class="text-red-600 text-xs mt-2">{{ $message }}</p>
-                @enderror
+                <input id="login"
+                       type="text"
+                       name="login"
+                       value="{{ old('login') }}"
+                       required
+                       autofocus
+                       class="w-full rounded border border-gray-300 px-3 py-2">
             </div>
 
-            <div>
-                <label for="password" class="block text-sm font-semibold text-black mb-2">
+            <div class="mb-4">
+                <label for="password" class="mb-1 block text-sm font-medium">
                     Password
                 </label>
 
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">
-                        <i class="fa-solid fa-lock"></i>
-                    </span>
-
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        placeholder="Masukkan Password"
-                        class="w-full pl-11 pr-11 py-3 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                        required>
-
-                    <button
-                        type="button"
-                        onclick="togglePassword()"
-                        class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400">
-                        <i id="eyeIcon" class="fa-regular fa-eye-slash"></i>
-                    </button>
-                </div>
+                <input id="password"
+                       type="password"
+                       name="password"
+                       required
+                       class="w-full rounded border border-gray-300 px-3 py-2">
 
                 @error('password')
-                    <p class="text-red-600 text-xs mt-2">{{ $message }}</p>
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
 
-            <button
-                type="submit"
-                class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition">
+            <label class="mb-5 flex items-center gap-2 text-sm">
+                <input type="checkbox" name="remember" value="1">
+                Ingat saya
+            </label>
+
+            <button type="submit"
+                    class="w-full rounded bg-[#53632c] px-4 py-2 font-semibold text-white">
                 Login
             </button>
-
-          
-            <div class="text-center mt-3">
-    <a href="{{ route('forgot-password') }}"
-       class="text-blue-700 hover:underline text-sm">
-        Lupa Password?
-    </a>
-</div>
-
         </form>
-
-    </div>
-
-    <script>
-        function togglePassword() {
-            const input = document.getElementById('password');
-            const icon = document.getElementById('eyeIcon');
-
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            }
-        }
-    </script>
-
+    </main>
 </body>
 </html>
