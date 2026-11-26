@@ -29,55 +29,31 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        User::updateOrCreate(
-            ['email' => 'dosen@example.com'],
-            [
-                'name' => 'Dosen SIMTA',
-                'nim' => 'DOSEN001',
-                'password' => Hash::make('dosen123'),
-                'role' => 'dosen',
-            ]
-        );
+        $lecturers = [
+            ['haditya@gmail.com', 'DOSEN001', 'Haditya Prasetyo, S.Kom, M.Kom'],
+            ['domi@gmail.com', 'DOSEN002', 'Domi Sepri, M.Kom'],
+            ['mhd@gmail.com', 'DOSEN003', 'MHD ADHITIYA OKTA RIYANDI'],
+            ['yaslinda@gmail.com', 'DOSEN004', 'Dr. Yaslinda Lizar, S.Si., M.Kom.'],
+            ['syaflan@gmail.com', 'DOSEN005', 'Syaflan Sandi Harta Putra, S.Pd, M.Kom'],
+            ['raju@gmail.com', 'DOSEN006', 'Raju Wandira, M.Kom'],
+            ['novia@gmail.com', 'DOSEN007', 'Novia Lestari, M.Kom'],
+            ['ozzy@gmail.com', 'DOSEN008', 'Ozzy Secio Riza, M.Kom'],
+        ];
 
-        User::updateOrCreate(
-            ['email' => 'dosen2@example.com'],
-            [
-                'name' => 'Dr. Ahmad Sutrisno, M.Kom',
-                'nim' => 'DOSEN002',
-                'password' => Hash::make('dosen123'),
+        foreach ($lecturers as [$email, $nim, $name]) {
+            $lecturer = User::firstOrNew(['nim' => $nim]);
+            $lecturer->fill([
+                'name' => $name,
+                'email' => $email,
                 'role' => 'dosen',
-            ]
-        );
+            ]);
 
-        User::updateOrCreate(
-            ['email' => 'dosen3@example.com'],
-            [
-                'name' => 'Prof. Dr. Siti Rahayu, M.T.',
-                'nim' => 'DOSEN003',
-                'password' => Hash::make('dosen123'),
-                'role' => 'dosen',
-            ]
-        );
+            if (!$lecturer->exists) {
+                $lecturer->password = Hash::make(bin2hex(random_bytes(32)));
+            }
 
-        User::updateOrCreate(
-            ['email' => 'dosen4@example.com'],
-            [
-                'name' => 'Dr. Budi Santoso, M.Kom',
-                'nim' => 'DOSEN004',
-                'password' => Hash::make('dosen123'),
-                'role' => 'dosen',
-            ]
-        );
-
-        User::updateOrCreate(
-            ['email' => 'dosen5@example.com'],
-            [
-                'name' => 'Ir. Dewi Lestari, M.T.',
-                'nim' => 'DOSEN005',
-                'password' => Hash::make('dosen123'),
-                'role' => 'dosen',
-            ]
-        );
+            $lecturer->save();
+        }
 
         User::updateOrCreate(
             ['email' => 'tu@example.com'],

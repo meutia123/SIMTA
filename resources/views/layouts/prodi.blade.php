@@ -61,6 +61,10 @@
                    class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.pengumuman*') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
                     ▤ Pengumuman
                 </a>
+                <a href="{{ route('prodi.profil') }}"
+                   class="flex items-center gap-2 px-2 py-2 rounded {{ request()->routeIs('prodi.profil') ? 'bg-[#841719] border border-white' : 'hover:bg-[#606b2d]' }}">
+                    ◉ Profil
+                </a>
             </nav>
             <!-- IDENTITAS -->
             <div class="mt-auto pt-6">
@@ -104,9 +108,14 @@
                        title="Pengajuan menunggu" aria-label="Pengajuan menunggu" class="relative text-sm">
                         🔔
                     </a>
-                    <div class="w-6 h-6 rounded-full bg-[#a34a4b] flex items-center justify-center text-xs">
-                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                    </div>
+                    <a href="{{ route('prodi.profil') }}" title="Profil {{ Auth::user()->name }}" class="w-6 h-6 overflow-hidden rounded-full bg-[#a34a4b] flex items-center justify-center text-xs">
+                        @if(Auth::user()->foto_path)
+                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url(Auth::user()->foto_path) }}"
+                                 alt="" class="h-full w-full object-cover">
+                        @else
+                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                        @endif
+                    </a>
                 </div>
             </header>
             <main class="flex-1 min-w-0 p-5">
@@ -115,5 +124,6 @@
         </div>
     </div>
 </div>
+@stack('scripts')
 </body>
 </html>

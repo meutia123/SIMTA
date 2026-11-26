@@ -4,6 +4,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DosenDashboardController;
 use App\Http\Controllers\DosenNilaiController;
+use App\Http\Controllers\DosenProfileController;
 use App\Http\Controllers\MahasiswaDashboardController;
 use App\Http\Controllers\MahasiswaNotificationController;
 use App\Http\Controllers\MahasiswaPengumumanController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\MahasiswaSearchController;
 use App\Http\Controllers\ProdiJadwalController;
 use App\Http\Controllers\ProdiDashboardController;
 use App\Http\Controllers\ProdiMonitoringController;
+use App\Http\Controllers\ProdiProfileController;
 use App\Http\Controllers\ProdiPengumumanController;
 use App\Http\Controllers\ProdiTugasAkhirController;
 use App\Http\Controllers\ProdiValidasiNilaiController;
@@ -66,14 +68,25 @@ Route::middleware(['auth', 'role:mahasiswa'])->group(function () {
 
 Route::middleware(['auth', 'role:dosen'])->group(function () {
     Route::get('/dosen/dashboard', [DosenDashboardController::class, 'index'])->name('dosen.dashboard');
+    Route::get('/dosen/mahasiswa', [DosenDashboardController::class, 'mahasiswa'])->name('dosen.mahasiswa');
+    Route::get('/dosen/mahasiswa/{tugasAkhir}', [DosenDashboardController::class, 'detailMahasiswa'])->name('dosen.mahasiswa.show');
     Route::get('/dosen/jadwal', [DosenDashboardController::class, 'jadwal'])->name('dosen.jadwal');
+    Route::get('/dosen/input-nilai', [DosenDashboardController::class, 'inputNilai'])->name('dosen.input-nilai');
     Route::get('/dosen/jadwal/{jadwal}/nilai', [DosenNilaiController::class, 'edit'])->name('dosen.nilai');
     Route::post('/dosen/jadwal/{jadwal}/nilai', [DosenNilaiController::class, 'store'])->name('dosen.nilai.store');
     Route::get('/dosen/keterlibatan', [DosenDashboardController::class, 'keterlibatan'])->name('dosen.keterlibatan');
+    Route::get('/dosen/dokumen', [DosenDashboardController::class, 'dokumen'])->name('dosen.dokumen');
+    Route::get('/dosen/dokumen/{document}/download', [DosenDashboardController::class, 'downloadDocument'])->name('dosen.dokumen.download');
+    Route::get('/dosen/profil', [DosenProfileController::class, 'index'])->name('dosen.profil');
+    Route::post('/dosen/profil/foto', [DosenProfileController::class, 'updatePhoto'])->name('dosen.profil.foto');
+    Route::post('/dosen/profil/password', [DosenProfileController::class, 'updatePassword'])->name('dosen.profil.password');
 });
 
 Route::middleware(['auth', 'role:prodi'])->group(function () {
     Route::get('/prodi/dashboard', [ProdiDashboardController::class, 'index'])->name('prodi.dashboard');
+    Route::get('/prodi/profil', [ProdiProfileController::class, 'index'])->name('prodi.profil');
+    Route::post('/prodi/profil/foto', [ProdiProfileController::class, 'updatePhoto'])->name('prodi.profil.foto');
+    Route::post('/prodi/profil/password', [ProdiProfileController::class, 'updatePassword'])->name('prodi.profil.password');
     Route::get('/prodi/progres-mahasiswa', [ProdiMonitoringController::class, 'progress'])->name('prodi.progres-mahasiswa');
     Route::get('/prodi/laporan', [ProdiMonitoringController::class, 'report'])->name('prodi.laporan');
     Route::get('/prodi/laporan/export', [ProdiMonitoringController::class, 'exportReport'])->name('prodi.laporan.export');

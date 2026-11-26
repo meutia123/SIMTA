@@ -43,26 +43,58 @@ class ProdiMonitoringController extends Controller
         ]);
     }
 
-    public function report()
+    public function report(Request $request)
     {
-        $rows = $this->progressRows();
+        $allRows = $this->progressRows();
+        $periods = $this->reportPeriods($allRows);
+        $filters = $request->validate([
+            'periode' => ['nullable', 'date_format:Y-m', Rule::in($periods->keys()->all())],
+        ]);
+        $periode = $filters['periode'] ?? $periods->keys()->first();
+        $rows = $periode
+            ? $allRows->filter(fn (array $row) => $this->periodForRow($row) === $periode)
+            : $allRows;
+        $stageLabels = [
+            'pengajuan-judul' => 'Pengajuan Judul',
+            'pembimbing' => 'Pembimbing Ditetapkan',
+            'sempro' => 'Sempro',
+            'sidang' => 'Sidang / Komprehensif',
+            'selesai' => 'Selesai',
+        ];
+        $stageCounts = collect($stageLabels)->mapWithKeys(fn (string $label, string $key) => [
+            $key => [
+                'label' => $label,
+                'count' => $rows->where('tahap_key', $key)->count(),
+            ],
+        ]);
+        $maxStageCount = max(1, (int) $stageCounts->max('count'));
 
         return view('prodi.laporan', [
             'summary' => [
                 'total' => $rows->count(),
-                'menunggu' => $rows->where('tugasAkhir.status', 'Menunggu')->count(),
-                'perlu_perbaikan' => $rows->where('tugasAkhir.status', 'Perlu Perbaikan')->count(),
-                'pembimbing' => $rows->filter(fn (array $row) => $row['tugasAkhir']->dosen_pembimbing_1 && $row['tugasAkhir']->dosen_pembimbing_2)->count(),
+                'disetujui' => $rows->where('tugasAkhir.status', 'Disetujui')->count(),
                 'sempro_lulus' => $rows->filter(fn (array $row) => $row['sempro']?->nilaiTervalidasi() && $row['sempro']?->hasil === 'Lulus')->count(),
                 'sidang_lulus' => $rows->filter(fn (array $row) => $row['sidang']?->nilaiTervalidasi() && $row['sidang']?->hasil === 'Lulus')->count(),
             ],
-            'progressDistribution' => $rows->countBy('progress')->sortDesc(),
+            'stageCounts' => $stageCounts,
+            'maxStageCount' => $maxStageCount,
+            'periods' => $periods,
+            'periode' => $periode,
         ]);
     }
 
-    public function exportReport()
+    public function exportReport(Request $request)
     {
-        $csvRows = $this->progressRows()->map(function (array $row) {
+        $allRows = $this->progressRows();
+        $periods = $this->reportPeriods($allRows);
+        $filters = $request->validate([
+            'periode' => ['nullable', 'date_format:Y-m', Rule::in($periods->keys()->all())],
+        ]);
+        $periode = $filters['periode'] ?? $periods->keys()->first();
+        $rows = $periode
+            ? $allRows->filter(fn (array $row) => $this->periodForRow($row) === $periode)
+            : $allRows;
+        $csvRows = $rows->map(function (array $row) {
             $task = $row['tugasAkhir'];
             $student = $task->mahasiswa;
 
@@ -111,7 +143,7 @@ class ProdiMonitoringController extends Controller
             }
 
             fclose($stream);
-        }, 'laporan-progres-tugas-akhir.csv', [
+        }, 'laporan-progres-tugas-akhir' . ($periode ? '-' . $periode : '') . '.csv', [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }
@@ -205,6 +237,32 @@ class ProdiMonitoringController extends Controller
                 ...$stage,
             ];
         });
+    }
+
+    private function reportPeriods(Collection $rows): Collection
+    {
+        $monthNames = [
+            1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+        ];
+
+        return $rows->mapWithKeys(function (array $row) use ($monthNames) {
+            $period = $this->periodForRow($row);
+            $date = \Carbon\Carbon::createFromFormat('Y-m', $period);
+
+            return [
+                $period => 'Wisuda ' . $monthNames[(int) $date->format('n')] . ' ' . $date->format('Y'),
+            ];
+        })->sortKeysDesc();
+    }
+
+    private function periodForRow(array $row): string
+    {
+        $date = $row['sidang']?->waktu
+            ?? $row['sempro']?->waktu
+            ?? $row['tugasAkhir']->created_at;
+
+        return $date->format('Y-m');
     }
 
     private function progressStage(TugasAkhir $tugasAkhir, ?Jadwal $sempro, ?Jadwal $sidang): array

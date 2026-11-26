@@ -35,6 +35,20 @@ class ProdiReportingTest extends TestCase
             'hasil' => 'Lulus',
         ]);
         $sempro->penguji()->attach($advisor->id);
+        $otherStudent = User::factory()->create(['role' => 'mahasiswa', 'name' => 'Mahasiswa Periode Lain']);
+        $otherTask = TugasAkhir::create([
+            'user_id' => $otherStudent->id,
+            'judul' => 'Judul Periode Lain',
+            'topik' => 'Sistem Informasi',
+            'status' => 'Menunggu',
+        ]);
+        Jadwal::create([
+            'user_id' => $otherStudent->id,
+            'tugas_akhir_id' => $otherTask->id,
+            'jenis' => 'sempro',
+            'waktu' => now()->subMonths(2),
+            'status' => 'menunggu',
+        ]);
 
         $this->actingAs($prodi)
             ->get(route('prodi.progres-mahasiswa', ['q' => 'Mahasiswa Laporan']))
@@ -44,12 +58,15 @@ class ProdiReportingTest extends TestCase
 
         $this->get(route('prodi.laporan'))
             ->assertOk()
-            ->assertSee('Sempro Lulus')
-            ->assertSee('Sidang/Komprehensif Lulus')
-            ->assertSee('Unduh CSV');
+            ->assertSee('Lulus Sempro')
+            ->assertSee('Lulus Sidang')
+            ->assertSee('Unduh Laporan')
+            ->assertSee('Wisuda');
 
-        $this->get(route('prodi.laporan.export'))
-            ->assertDownload('laporan-progres-tugas-akhir.csv');
+        $export = $this->get(route('prodi.laporan.export'));
+        $export->assertDownload('laporan-progres-tugas-akhir-' . now()->subDay()->format('Y-m') . '.csv');
+        $this->assertStringContainsString('Mahasiswa Laporan', $export->streamedContent());
+        $this->assertStringNotContainsString('Mahasiswa Periode Lain', $export->streamedContent());
 
         $this->get(route('prodi.rekap-dosen', ['periode' => now()->subDay()->format('Y-m')]))
             ->assertOk()
